@@ -1,0 +1,3243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Niagara VFX 参数速查与学习指南 | UE4/UE5</title>
+<style>
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #1c2333;
+  --bg-card: #21262d;
+  --bg-hover: #292e36;
+  --border: #30363d;
+  --border-bright: #484f58;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #636c76;
+  --accent-blue: #58a6ff;
+  --accent-purple: #bc8cff;
+  --accent-green: #3fb950;
+  --accent-orange: #d29922;
+  --accent-red: #f85149;
+  --accent-cyan: #39d2c0;
+  --accent-pink: #f778ba;
+  --accent-yellow: #e3b341;
+  --glow-blue: rgba(88,166,255,0.15);
+  --glow-purple: rgba(188,140,255,0.15);
+  --glow-green: rgba(63,185,80,0.15);
+  --glow-orange: rgba(210,153,34,0.15);
+  --glow-red: rgba(248,81,73,0.12);
+  --glow-cyan: rgba(57,210,192,0.15);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+::selection { background: rgba(88,166,255,0.3); }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-bright); }
+
+/* ============ HEADER ============ */
+.header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(13,17,23,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.header-brand {
+  display: flex; align-items: center; gap: 14px;
+  text-decoration: none; color: var(--text-primary);
+}
+
+.header-logo {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 18px;
+}
+
+.header-title { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+.header-title span { color: var(--accent-blue); }
+
+.search-box {
+  position: relative; width: 340px;
+}
+
+.search-box input {
+  width: 100%; padding: 8px 16px 8px 40px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: var(--transition);
+}
+
+.search-box input:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--glow-blue);
+}
+
+.search-box input::placeholder { color: var(--text-muted); }
+
+.search-box svg {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--text-muted); width: 18px; height: 18px;
+}
+
+.header-links { display: flex; gap: 8px; }
+
+.header-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: var(--transition);
+  display: flex; align-items: center; gap: 6px;
+}
+
+.header-links a:hover { color: var(--text-primary); background: var(--bg-hover); }
+
+/* ============ LAYOUT ============ */
+.layout {
+  display: flex;
+  margin-top: 64px;
+  min-height: calc(100vh - 64px);
+}
+
+/* ============ SIDEBAR ============ */
+.sidebar {
+  width: 260px; min-width: 260px;
+  position: fixed; left: 0; top: 64px;
+  height: calc(100vh - 64px);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 16px 0;
+  z-index: 100;
+}
+
+.sidebar-section { padding: 0 16px; margin-bottom: 8px; }
+
+.sidebar-label {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  padding: 12px 0 8px 0;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  transition: var(--transition);
+  cursor: pointer;
+  position: relative;
+}
+
+.nav-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+.nav-item.active {
+  background: var(--glow-blue);
+  color: var(--accent-blue);
+  font-weight: 600;
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute; left: -16px; top: 4px; bottom: 4px;
+  width: 3px;
+  background: var(--accent-blue);
+  border-radius: 0 3px 3px 0;
+}
+
+.nav-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ============ MAIN ============ */
+.main {
+  flex: 1;
+  margin-left: 260px;
+  padding: 40px 48px 80px;
+  max-width: 1100px;
+}
+
+/* ============ SECTIONS ============ */
+.section {
+  margin-bottom: 64px;
+  animation: fadeUp 0.5s ease-out;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-icon {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.section-title { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+
+.section-desc {
+  color: var(--text-secondary);
+  font-size: 15px;
+  margin-bottom: 24px;
+  line-height: 1.8;
+}
+
+/* ============ CARDS ============ */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.card-grid-3 { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: var(--transition);
+  cursor: default;
+}
+
+.card:hover {
+  border-color: var(--border-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.card-head {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 12px;
+}
+
+.card-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.card-title {
+  font-size: 16px; font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.card-text {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.card-params {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.param-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.param-name { color: var(--accent-cyan); font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; }
+.param-val { color: var(--text-secondary); }
+
+/* ============ INTERACTIVE DIAGRAM ============ */
+.diagram-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+.diagram-title {
+  font-size: 15px; font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--text-secondary);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stack-diagram {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.stack-level {
+  border-radius: 10px;
+  padding: 16px 20px;
+  transition: var(--transition);
+  cursor: pointer;
+  position: relative;
+  border: 2px solid transparent;
+}
+
+.stack-level:hover {
+  transform: scale(1.02);
+  z-index: 2;
+}
+
+.stack-level.active {
+  border-color: currentColor;
+  box-shadow: 0 0 20px currentColor;
+}
+
+.stack-level-header {
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.stack-level-name {
+  font-weight: 700;
+  font-size: 15px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.stack-level-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.1);
+}
+
+.stack-arrow {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 18px;
+  margin: 2px 0;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.stack-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.3s ease;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.stack-level.active .stack-detail {
+  max-height: 500px;
+  padding-top: 12px;
+  margin-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.detail-list { list-style: none; }
+.detail-list li { padding: 3px 0; }
+.detail-list li::before { content: '▸ '; opacity: 0.5; }
+
+/* ============ FLOW DIAGRAM ============ */
+.flow-container {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 20px 0;
+  overflow-x: auto;
+}
+
+.flow-node {
+  flex: 1;
+  min-width: 140px;
+  text-align: center;
+  padding: 16px 12px;
+  border-radius: var(--radius);
+  position: relative;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.flow-node:hover { transform: translateY(-4px); }
+
+.flow-node::after {
+  content: '→';
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: var(--text-muted);
+}
+
+.flow-node:last-child::after { display: none; }
+
+.flow-node-icon { font-size: 28px; margin-bottom: 8px; }
+.flow-node-label { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.flow-node-sub { font-size: 11px; color: var(--text-secondary); }
+
+/* ============ TABS ============ */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.tab-btn:hover { color: var(--text-primary); background: var(--bg-hover); }
+
+.tab-btn.active {
+  background: var(--accent-blue);
+  color: #fff;
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeUp 0.3s ease-out; }
+
+/* ============ TABLE ============ */
+.ref-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.ref-table th {
+  background: var(--bg-tertiary);
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+}
+
+.ref-table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.ref-table tr:hover td { background: var(--bg-hover); }
+
+.ref-table code {
+  background: rgba(88,166,255,0.1);
+  color: var(--accent-cyan);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: 'Consolas', 'Monaco', monospace;
+}
+
+.ref-table .type-tag {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ============ COLLAPSIBLE ============ */
+.collapsible {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.collapsible-header {
+  padding: 16px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+}
+
+.collapsible-header:hover { background: var(--bg-hover); }
+
+.collapsible-title {
+  font-weight: 600;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.collapsible-arrow {
+  transition: transform 0.3s ease;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.collapsible.open .collapsible-arrow { transform: rotate(90deg); }
+
+.collapsible-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.collapsible.open .collapsible-body { max-height: 2000px; }
+
+.collapsible-content {
+  padding: 0 20px 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+/* ============ RECIPE CARD ============ */
+.recipe-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 20px;
+  transition: var(--transition);
+}
+
+.recipe-card:hover {
+  border-color: var(--border-bright);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.recipe-banner {
+  height: 6px;
+}
+
+.recipe-body { padding: 24px; }
+
+.recipe-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.recipe-subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.recipe-step {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.step-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  flex-shrink: 0;
+}
+
+.step-content { flex: 1; }
+.step-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.step-desc { font-size: 13px; color: var(--text-secondary); }
+.step-code {
+  background: var(--bg-primary);
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 12px;
+  color: var(--accent-cyan);
+  overflow-x: auto;
+}
+
+/* ============ TOOLTIP ============ */
+.tip-box {
+  background: linear-gradient(135deg, rgba(88,166,255,0.08), rgba(188,140,255,0.08));
+  border: 1px solid rgba(88,166,255,0.2);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin: 16px 0;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.tip-box.warn {
+  background: linear-gradient(135deg, rgba(210,153,34,0.08), rgba(248,81,73,0.08));
+  border-color: rgba(210,153,34,0.2);
+}
+
+.tip-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.tip-text { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+.tip-text strong { color: var(--text-primary); }
+
+/* ============ SVG DIAGRAM ============ */
+.svg-diagram {
+  width: 100%;
+  max-width: 740px;
+  margin: 0 auto;
+  display: block;
+}
+
+.svg-diagram text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+/* ============ PARAM SLIDER DEMO ============ */
+.demo-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.demo-title {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.demo-canvas {
+  width: 100%;
+  height: 200px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.slider-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 10px;
+}
+
+.slider-label {
+  width: 140px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.slider-label code {
+  background: rgba(88,166,255,0.1);
+  color: var(--accent-cyan);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+input[type="range"] {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: 3px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  background: var(--accent-blue);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 8px var(--accent-blue);
+  transform: scale(1.2);
+}
+
+.slider-value {
+  width: 50px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-blue);
+  font-family: 'Consolas', monospace;
+}
+
+/* ============ LEARNING PATH ============ */
+.path-timeline {
+  position: relative;
+  padding-left: 32px;
+}
+
+.path-timeline::before {
+  content: '';
+  position: absolute;
+  left: 12px; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--accent-blue), var(--accent-purple), var(--accent-green));
+  border-radius: 1px;
+}
+
+.path-item {
+  position: relative;
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.path-item::before {
+  content: '';
+  position: absolute;
+  left: -26px; top: 20px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 2px solid;
+}
+
+.path-item-phase {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.path-item-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.path-item-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.path-item-links {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.path-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--accent-blue);
+  font-size: 12px;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.path-link:hover { background: var(--bg-hover); border-color: var(--accent-blue); }
+
+/* ============ CHEATSHEET ============ */
+.cheat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+.cheat-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  transition: var(--transition);
+}
+
+.cheat-item:hover { border-color: var(--border-bright); }
+
+.cheat-q {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: var(--accent-yellow);
+}
+
+.cheat-a {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.cheat-a code {
+  background: rgba(88,166,255,0.1);
+  color: var(--accent-cyan);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+/* ============ SEARCH HIGHLIGHT ============ */
+.highlight-match { background: rgba(227,179,65,0.25); border-radius: 2px; }
+
+/* ============ MIND MAP ============ */
+.mindmap-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 20px;
+  overflow-x: auto;
+}
+
+.mm-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  min-width: 700px;
+}
+
+.mm-root {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.mm-root-node {
+  display: inline-block;
+  background: linear-gradient(135deg, #58a6ff, #bc8cff);
+  color: #fff;
+  font-weight: 800;
+  font-size: 18px;
+  padding: 14px 36px;
+  border-radius: 28px;
+  box-shadow: 0 4px 24px rgba(88,166,255,0.3);
+  letter-spacing: 0.5px;
+}
+
+.mm-branches {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mm-branch {
+  flex: 1;
+  min-width: 180px;
+  max-width: 260px;
+}
+
+.mm-branch-head {
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+}
+
+.mm-branch-head::before {
+  content: '';
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  width: 2px;
+  height: 24px;
+  background: var(--border-bright);
+}
+
+.mm-branch-head:hover { filter: brightness(1.2); transform: translateY(-2px); }
+
+.mm-leaves {
+  border-left: 2px solid var(--border);
+  margin-left: 24px;
+  padding-left: 14px;
+}
+
+.mm-leaf {
+  position: relative;
+  padding: 5px 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  cursor: default;
+  border-radius: 6px;
+  transition: var(--transition);
+}
+
+.mm-leaf:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.mm-leaf::before {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 14px;
+  width: 14px;
+  height: 2px;
+  background: var(--border);
+}
+
+.mm-leaf code {
+  background: rgba(88,166,255,0.1);
+  color: var(--accent-cyan);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.mm-leaf strong { color: var(--text-primary); }
+
+/* second-level mind map for thinking framework */
+.think-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.think-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  border-top: 3px solid;
+  transition: var(--transition);
+}
+
+.think-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  border-color: var(--border-bright);
+}
+
+.think-card-num {
+  font-size: 28px;
+  font-weight: 900;
+  opacity: 0.15;
+  position: absolute;
+  right: 16px;
+  top: 10px;
+}
+
+.think-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.think-card-body {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.think-card-body ol {
+  padding-left: 18px;
+  margin-top: 6px;
+}
+
+.think-card-body li {
+  margin-bottom: 4px;
+}
+
+.notes-area {
+  background: var(--bg-secondary);
+  border: 1px dashed var(--border-bright);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.notes-area textarea {
+  width: 100%;
+  min-height: 100px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.7;
+  resize: vertical;
+  outline: none;
+}
+
+.notes-area textarea::placeholder { color: var(--text-muted); }
+
+.notes-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 1024px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 24px; }
+}
+
+@media (max-width: 640px) {
+  .header { padding: 0 16px; }
+  .search-box { width: 180px; }
+  .card-grid { grid-template-columns: 1fr; }
+  .flow-container { flex-direction: column; }
+  .flow-node::after { content: '↓'; right: auto; bottom: -12px; top: auto; left: 50%; transform: translateX(-50%); }
+}
+
+/* ============ BACK TO TOP ============ */
+.back-top {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 44px;
+  height: 44px;
+  background: var(--accent-blue);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: var(--transition);
+  z-index: 999;
+  border: none;
+  box-shadow: 0 4px 16px rgba(88,166,255,0.3);
+}
+
+.back-top.visible { opacity: 1; transform: translateY(0); }
+.back-top:hover { background: #79b8ff; transform: translateY(-2px); }
+
+/* ============ PARTICLE BG DECORATION ============ */
+.bg-glow {
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: -1;
+}
+</style>
+</head>
+<body>
+
+<div class="bg-glow" style="background:var(--accent-purple);top:-100px;left:-100px;"></div>
+<div class="bg-glow" style="background:var(--accent-blue);bottom:-100px;right:-100px;"></div>
+
+<!-- ============ HEADER ============ -->
+<header class="header">
+  <a class="header-brand" href="#">
+    <div class="header-logo">N</div>
+    <div class="header-title">Niagara <span>VFX</span> 速查手册</div>
+  </a>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input type="text" id="globalSearch" placeholder="搜索参数、模块、关键词…" autocomplete="off">
+  </div>
+  <div class="header-links">
+    <a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/overview-of-niagara-effects-for-unreal-engine" target="_blank">📖 官方文档</a>
+    <a href="https://www.realtime.xyz/moon" target="_blank">🌙 元素神殿</a>
+  </div>
+</header>
+
+<!-- ============ SIDEBAR ============ -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">基础架构</div>
+    <a class="nav-item active" href="#arch" data-section="arch">
+      <div class="nav-dot" style="background:var(--accent-blue)"></div>系统架构总览
+    </a>
+    <a class="nav-item" href="#lifecycle" data-section="lifecycle">
+      <div class="nav-dot" style="background:var(--accent-purple)"></div>粒子生命周期
+    </a>
+    <a class="nav-item" href="#stack" data-section="stack">
+      <div class="nav-dot" style="background:var(--accent-cyan)"></div>模块堆栈详解
+    </a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">核心模块</div>
+    <a class="nav-item" href="#spawn" data-section="spawn">
+      <div class="nav-dot" style="background:var(--accent-green)"></div>Spawn 生成
+    </a>
+    <a class="nav-item" href="#update" data-section="update">
+      <div class="nav-dot" style="background:var(--accent-orange)"></div>Update 更新
+    </a>
+    <a class="nav-item" href="#render" data-section="render">
+      <div class="nav-dot" style="background:var(--accent-pink)"></div>Render 渲染
+    </a>
+    <a class="nav-item" href="#forces" data-section="forces">
+      <div class="nav-dot" style="background:var(--accent-red)"></div>力与物理
+    </a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">进阶技巧</div>
+    <a class="nav-item" href="#dynamic" data-section="dynamic">
+      <div class="nav-dot" style="background:var(--accent-yellow)"></div>动态输入
+    </a>
+    <a class="nav-item" href="#dataif" data-section="dataif">
+      <div class="nav-dot" style="background:var(--accent-cyan)"></div>数据接口
+    </a>
+    <a class="nav-item" href="#recipes" data-section="recipes">
+      <div class="nav-dot" style="background:var(--accent-orange)"></div>元素配方
+    </a>
+    <a class="nav-item" href="#interactive" data-section="interactive">
+      <div class="nav-dot" style="background:var(--accent-blue)"></div>交互演示
+    </a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">速查 & 学习</div>
+    <a class="nav-item" href="#cheat" data-section="cheat">
+      <div class="nav-dot" style="background:var(--accent-green)"></div>速查问答
+    </a>
+    <a class="nav-item" href="#path" data-section="path">
+      <div class="nav-dot" style="background:var(--accent-purple)"></div>学习路径
+    </a>
+    <a class="nav-item" href="#mindmap" data-section="mindmap">
+      <div class="nav-dot" style="background:var(--accent-yellow)"></div>思维导图
+    </a>
+  </div>
+</nav>
+
+<!-- ============ MAIN CONTENT ============ -->
+<div class="layout">
+<main class="main">
+
+<!-- ====== SECTION: 架构总览 ====== -->
+<section class="section" id="arch">
+  <div class="section-header">
+    <div class="section-icon" style="background:var(--glow-blue);color:var(--accent-blue);">🏗️</div>
+    <div>
+      <div class="section-title">Niagara 系统架构总览</div>
+    </div>
+  </div>
+  <p class="section-desc">Niagara 是 UE4.20+ / UE5 引入的新一代粒子系统，替代旧版 Cascade。它采用<strong>模块化堆栈架构</strong>，所有行为由可插拔的模块从上到下依次执行。理解这个架构是掌握 Niagara 的第一步。</p>
+
+  <!-- 层级关系图 -->
+  <div class="diagram-container">
+    <div class="diagram-title">▾ Niagara 四层嵌套结构（点击展开详情）</div>
+    <div class="stack-diagram" id="archDiagram">
+
+      <div class="stack-level" style="background:linear-gradient(135deg,#1a2744,#1d2d50);color:#58a6ff;" onclick="toggleStack(this)">
+        <div class="stack-level-header">
+          <div class="stack-level-name">📦 Niagara System（系统）</div>
+          <div class="stack-level-tag">最外层容器</div>
+        </div>
+        <div class="stack-detail">
+          <p>System 是可以直接放入关卡的资产。一个 System 包含一个或多个 Emitter。</p>
+          <ul class="detail-list">
+            <li><strong>System Spawn</strong> — 系统创建时执行一次</li>
+            <li><strong>System Update</strong> — 每帧执行，控制全局参数</li>
+            <li><strong>User Parameters</strong> — 暴露给蓝图/Sequencer 的参数</li>
+            <li>一个 System 内的 Emitter 共享时间线和空间</li>
+          </ul>
+        </div>
+      </div>
+      <div class="stack-arrow">▼</div>
+
+      <div class="stack-level" style="background:linear-gradient(135deg,#1f2a1f,#243024);color:#3fb950;" onclick="toggleStack(this)">
+        <div class="stack-level-header">
+          <div class="stack-level-name">🎯 Emitter（发射器）</div>
+          <div class="stack-level-tag">中间层</div>
+        </div>
+        <div class="stack-detail">
+          <p>每个 Emitter 定义一种粒子的行为。一个 System 可以包含多个 Emitter 来组合复杂效果。</p>
+          <ul class="detail-list">
+            <li><strong>Emitter Spawn</strong> — 发射器创建时初始化</li>
+            <li><strong>Emitter Update</strong> — 每帧更新发射器状态</li>
+            <li><strong>Execution State</strong> — Active / Inactive / InactiveClear / Complete</li>
+            <li>可设置 Local Space 或 World Space</li>
+            <li>每个 Emitter 独立管理自己的粒子池</li>
+          </ul>
+        </div>
+      </div>
+      <div class="stack-arrow">▼</div>
+
+      <div class="stack-level" style="background:linear-gradient(135deg,#2a2420,#302820);color:#d29922;" onclick="toggleStack(this)">
+        <div class="stack-level-header">
+          <div class="stack-level-name">✨ Particle（粒子）</div>
+          <div class="stack-level-tag">最内层</div>
+        </div>
+        <div class="stack-detail">
+          <p>每个粒子是 Emitter 产生的一个独立实体，拥有自己的属性集。</p>
+          <ul class="detail-list">
+            <li><strong>Particle Spawn</strong> — 粒子出生时执行一次（位置/速度/颜色/大小等初始值）</li>
+            <li><strong>Particle Update</strong> — 每帧对每个存活粒子执行（重力/阻力/颜色渐变等）</li>
+            <li>核心属性：Position, Velocity, Color, Size, Age, Lifetime, NormalizedAge…</li>
+            <li>可自定义属性（右键 → Add Parameter）</li>
+          </ul>
+        </div>
+      </div>
+      <div class="stack-arrow">▼</div>
+
+      <div class="stack-level" style="background:linear-gradient(135deg,#2a1f2a,#301f30);color:#f778ba;" onclick="toggleStack(this)">
+        <div class="stack-level-header">
+          <div class="stack-level-name">🖼️ Renderer（渲染器）</div>
+          <div class="stack-level-tag">输出层</div>
+        </div>
+        <div class="stack-detail">
+          <p>Renderer 决定粒子的可视化方式，读取粒子属性并渲染到屏幕。</p>
+          <ul class="detail-list">
+            <li><strong>Sprite Renderer</strong> — 2D 面片/Billboard（最常用）</li>
+            <li><strong>Mesh Renderer</strong> — 3D 模型实例化</li>
+            <li><strong>Ribbon Renderer</strong> — 拖尾/带状（刀光、轨迹）</li>
+            <li><strong>Light Renderer</strong> — 每粒子一盏动态灯</li>
+            <li><strong>Component Renderer</strong> — 任意 UE 组件</li>
+            <li><strong>Decal Renderer</strong> — 贴花投射</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-icon">💡</div>
+    <div class="tip-text"><strong>核心理解：</strong>Niagara 的一切行为都是 <strong>Module（模块）</strong>。模块按 <strong>从上到下的顺序</strong>在对应的组（Spawn/Update/Render）中执行。后面的模块可以读取并覆盖前面模块写入的参数值。这就是「堆栈」的含义。</div>
+  </div>
+</section>
+
+<!-- ====== SECTION: 粒子生命周期 ====== -->
+<section class="section" id="lifecycle">
+  <div class="section-header">
+    <div class="section-icon" style="background:var(--glow-purple);color:var(--accent-purple);">🔄</div>
+    <div>
+      <div class="section-title">粒子生命周期</div>
+    </div>
+  </div>
+  <p class="section-desc">每个粒子从出生到死亡，经历一系列明确的阶段。理解这个流程，就能准确判断「我的参数应该放在哪个组里」。</p>
+
+  <div class="diagram-container">
+    <div class="diagram-title">▾ 粒子完整生命流程</div>
+    <div class="flow-container">
+      <div class="flow-node" style="background:linear-gradient(135deg,#1a2744,#1d2d50);color:#58a6ff;">
+        <div class="flow-node-icon">🔵</div>
+        <div class="flow-node-label">System Init</div>
+        <div class="flow-node-sub">系统创建，初始化全局变量</div>
+      </div>
+      <div class="flow-node" style="background:linear-gradient(135deg,#1f2a1f,#243024);color:#3fb950;">
+        <div class="flow-node-icon">🟢</div>
+        <div class="flow-node-label">Emitter Spawn</div>
+        <div class="flow-node-sub">发射器启动，设置生成速率</div>
+      </div>
+      <div class="flow-node" style="background:linear-gradient(135deg,#2a2a1f,#343420);color:#e3b341;">
+        <div class="flow-node-icon">🟡</div>
+        <div class="flow-node-label">Particle Spawn</div>
+        <div class="flow-node-sub">粒子出生，初始化属性</div>
+      </div>
+      <div class="flow-node" style="background:linear-gradient(135deg,#2a2420,#302820);color:#d29922;">
+        <div class="flow-node-icon">🟠</div>
+        <div class="flow-node-label">Particle Update</div>
+        <div class="flow-node-sub">每帧更新位置/颜色/大小</div>
+      </div>
+      <div class="flow-node" style="background:linear-gradient(135deg,#2a1f2a,#301f30);color:#f778ba;">
+        <div class="flow-node-icon">🩷</div>
+        <div class="flow-node-label">Render</div>
+        <div class="flow-node-sub">渲染到屏幕</div>
+      </div>
+      <div class="flow-node" style="background:linear-gradient(135deg,#2a1f1f,#301f1f);color:#f85149;">
+        <div class="flow-node-icon">🔴</div>
+        <div class="flow-node-label">Death</div>
+        <div class="flow-node-sub">Age ≥ Lifetime，粒子销毁</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-icon">⏱️</div>
+    <div class="tip-text">
+      <strong>关键时间变量：</strong><br>
+      <code>Particles.Age</code> — 粒子已存活的秒数<br>
+      <code>Particles.Lifetime</code> — 粒子总寿命（秒）<br>
+      <code>Particles.NormalizedAge</code> — Age / Lifetime，范围 0→1，用于曲线采样<br>
+      当 <code>NormalizedAge ≥ 1</code> 时粒子被销毁（除非手动覆盖 Kill 逻辑）
+    </div>
+  </div>
+
+  <!-- Execution States -->
+  <h3 style="margin:24px 0 12px;font-size:17px;">Emitter 执行状态</h3>
+  <div class="card-grid" style="grid-template-columns:repeat(4,1fr);">
+    <div class="card" style="border-left:3px solid var(--accent-green);">
+      <div class="card-title" style="color:var(--accent-green);">Active</div>
+      <div class="card-text">正常模拟 + 可以生成新粒子</div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--accent-orange);">
+      <div class="card-title" style="color:var(--accent-orange);">Inactive</div>
+      <div class="card-text">继续模拟现有粒子，但不再生成新粒子</div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--accent-red);">
+      <div class="card-title" style="color:var(--accent-red);">InactiveClear</div>
+      <div class="card-text">销毁所有现有粒子，然后进入 Inactive</div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--text-muted);">
+      <div class="card-title" style="color:var(--text-muted);">Complete</div>
+      <div class="card-text">完全停止模拟和渲染</div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SECTION: 模块堆栈详解 ====== -->
+<section class="section" id="stack">
+  <div class="section-header">
+    <div class="section-icon" style="background:var(--glow-cyan);color:var(--accent-cyan);">📚</div>
+    <div>
+      <div class="section-title">模块堆栈详解</div>
+    </div>
+  </div>
+  <p class="section-desc">Niagara 的核心思想是<strong>堆栈模型</strong>：每个组（Group）内的模块按顺序执行，后面的模块可以覆盖或累加前面的值。下面详细展示每个组中的常用模块。</p>
+
+  <div class="tabs" id="stackTabs">
+    <button class="tab-btn active" data-tab="emitter-spawn">Emitter Spawn</button>
+    <button class="tab-btn" data-tab="emitter-update">Emitter Update</button>
+    <button class="tab-btn" data-tab="particle-spawn">Particle Spawn</button>
+    <button class="tab-btn" data-tab="particle-update">Particle Update</button>
+    <button class="tab-btn" data-tab="event">Event Handler</button>
+  </div>
+
+  <div class="tab-content active" id="tab-emitter-spawn">
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">🟢 Emitter Spawn — 发射器创建时执行一次</div>
+      <div class="card-text">在这个组里设置 Emitter 级别的初始值。通常不需要修改太多。</div>
+    </div>
+    <table class="ref-table">
+      <thead><tr><th>模块</th><th>作用</th><th>关键参数</th></tr></thead>
+      <tbody>
+        <tr><td><code>Emitter Properties</code></td><td>设置发射器基础属性</td><td>Local Space, Sim Target (CPU/GPU), Fixed Bounds, Determinism</td></tr>
+        <tr><td><code>Spawn Burst Instantaneous</code></td><td>瞬间生成一批粒子</td><td><code>Spawn Count</code> — 一次性生成数量</td></tr>
+        <tr><td><code>Emitter Life Cycle</code></td><td>控制发射器的生命周期</td><td>Loop Behavior, Loop Duration, Loop Delay</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tab-content" id="tab-emitter-update">
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">🔄 Emitter Update — 每帧执行（Emitter 级别）</div>
+      <div class="card-text">控制粒子的持续生成速率和发射器的运行时行为。</div>
+    </div>
+    <table class="ref-table">
+      <thead><tr><th>模块</th><th>作用</th><th>关键参数</th></tr></thead>
+      <tbody>
+        <tr><td><code>Spawn Rate</code></td><td>按速率持续生成粒子</td><td><code>SpawnRate</code> — 每秒生成数量（如 20 = 每秒20个）</td></tr>
+        <tr><td><code>Spawn Burst Instantaneous</code></td><td>瞬间爆发生成</td><td><code>Spawn Count</code>, <code>Spawn Time</code>, <code>Spawn Probability</code></td></tr>
+        <tr><td><code>Spawn Per Frame</code></td><td>每帧固定生成</td><td><code>Spawn Count Per Frame</code></td></tr>
+        <tr><td><code>Emitter State</code></td><td>管理发射器状态机</td><td>Life Cycle Mode, Scalability Mode</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tab-content" id="tab-particle-spawn">
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">✨ Particle Spawn — 每个粒子出生时执行一次</div>
+      <div class="card-text">这是使用最频繁的组。在这里设置每个粒子的初始状态——位置、速度、颜色、大小、生命周期等。</div>
+    </div>
+    <table class="ref-table">
+      <thead><tr><th>模块</th><th>作用</th><th>关键参数</th></tr></thead>
+      <tbody>
+        <tr><td><code>Initialize Particle</code></td><td>粒子属性初始化（最重要！）</td><td><code>Lifetime</code>, <code>Color</code>, <code>Sprite Size</code>, <code>Mass</code>, <code>Mesh Scale</code></td></tr>
+        <tr><td><code>Add Velocity</code></td><td>添加初始速度</td><td><code>Velocity</code> (X,Y,Z) — 世界空间或局部空间</td></tr>
+        <tr><td><code>Shape Location</code></td><td>在几何形状内生成粒子</td><td>Shape Type (Box/Sphere/Cylinder/Cone/Torus/Mesh)</td></tr>
+        <tr><td><code>Set Particles.Position</code></td><td>直接设置出生位置</td><td>Position 向量</td></tr>
+        <tr><td><code>Set Particles.Color</code></td><td>设置初始颜色</td><td>RGBA 颜色值</td></tr>
+        <tr><td><code>Set Particles.SpriteSize</code></td><td>设置精灵面片大小</td><td>X/Y 大小（像素/单位）</td></tr>
+        <tr><td><code>Set Particles.SubImageIndex</code></td><td>序列帧动画的初始帧</td><td>Index 值</td></tr>
+        <tr><td><code>Camera Offset</code></td><td>相对摄像机偏移</td><td>Offset 距离</td></tr>
+      </tbody>
+    </table>
+    <div class="tip-box">
+      <div class="tip-icon">⚡</div>
+      <div class="tip-text"><strong>Initialize Particle</strong> 是最核心的模块，几乎每个 Emitter 都会用到。它集中初始化 Lifetime、Color、Size 等基础属性。右键可以展开查看所有可设置的子属性。</div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-particle-update">
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">🔄 Particle Update — 每帧对每个存活粒子执行</div>
+      <div class="card-text">让粒子在生命周期内动起来——颜色渐变、大小缩放、受力运动、碰撞检测等。</div>
+    </div>
+    <table class="ref-table">
+      <thead><tr><th>模块</th><th>作用</th><th>关键参数</th></tr></thead>
+      <tbody>
+        <tr><td><code>Gravity Force</code></td><td>施加重力</td><td><code>Gravity</code> — 默认 (0,0,-980)</td></tr>
+        <tr><td><code>Drag</code></td><td>空气阻力</td><td><code>Drag</code> — 值越大减速越快 (0~∞)</td></tr>
+        <tr><td><code>Curl Noise Force</code></td><td>柏林噪声力场（烟雾翻涌效果）</td><td><code>Noise Strength</code>, <code>Noise Frequency</code>, <code>Pan Speed</code></td></tr>
+        <tr><td><code>Scale Color</code></td><td>随生命周期缩放颜色/透明度</td><td><code>Scale RGB</code>, <code>Scale Alpha</code> — 支持曲线</td></tr>
+        <tr><td><code>Scale Sprite Size</code></td><td>随生命周期缩放大小</td><td><code>Scale Factor</code> — 支持曲线</td></tr>
+        <tr><td><code>Solve Forces and Velocity</code></td><td>力学求解器（将力转化为位移）</td><td>必须放在所有力模块之后！</td></tr>
+        <tr><td><code>Collision</code></td><td>粒子碰撞</td><td>GPU: Scene Depth / Distance Field; CPU: Raycast</td></tr>
+        <tr><td><code>Sub UV Animation</code></td><td>序列帧动画播放</td><td><code>SubUV Lookup Mode</code>, <code>Sub Image Size</code></td></tr>
+        <tr><td><code>Sprite Facing and Alignment</code></td><td>精灵面片朝向控制</td><td>Face Camera, Custom Facing, Velocity Aligned</td></tr>
+      </tbody>
+    </table>
+    <div class="tip-box warn">
+      <div class="tip-icon">⚠️</div>
+      <div class="tip-text"><strong>Solve Forces and Velocity</strong> 必须放在所有 Force 模块（Gravity, Drag, Curl Noise 等）<strong>之后</strong>。它是力学求解器，负责将累加的力转化为速度和位置。如果顺序错了，力不会生效！</div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-event">
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">📡 Event Handler — 跨 Emitter 通信</div>
+      <div class="card-text">让不同 Emitter 之间传递数据。例如：粒子碰撞时在碰撞点触发第二个 Emitter 产生火花。</div>
+    </div>
+    <table class="ref-table">
+      <thead><tr><th>机制</th><th>说明</th><th>典型用途</th></tr></thead>
+      <tbody>
+        <tr><td><code>Generate Event</code></td><td>发送端：在满足条件时发送事件数据</td><td>碰撞时发送碰撞点位置和法线</td></tr>
+        <tr><td><code>Receive Event</code></td><td>接收端：监听事件并生成新粒子</td><td>在接收到的位置生成火花粒子</td></tr>
+        <tr><td><code>Death Event</code></td><td>粒子死亡时自动发送事件</td><td>粒子消失时在原地生成残留效果</td></tr>
+        <tr><td><code>Collision Event</code></td><td>粒子碰撞时自动发送事件</td><td>子弹击中地面时产生弹痕和尘土</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ====== SECTION: Spawn ====== -->
+<section class="section" id="spawn">
+  <div class="section-header">
+    <div class="section-icon" style="background:var(--glow-green);color:var(--accent-green);">🌱</div>
+    <div>
+      <div class="section-title">Spawn 生成参数详解</div>
+    </div>
+  </div>
+  <p class="section-desc">生成参数决定了「粒子从哪里来、有多少、以什么初始状态出现」。这是效果设计的起点。</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-badge" style="background:var(--glow-green);color:var(--accent-green);">核心</div>
+      </div>
+      <div class="card-title">Initialize Particle</div>
+      <div class="card-text">一站式初始化粒子的所有基础属性</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Lifetime</span><span class="param-val">float | 粒子存活秒数</span></div>
+        <div class="param-row"><span class="param-name">Color</span><span class="param-val">LinearColor | RGBA 初始颜色</span></div>
+        <div class="param-row"><span class="param-name">Sprite Size</span><span class="param-val">Vector2 | 面片宽高</span></div>
+        <div class="param-row"><span class="param-name">Mass</span><span class="param-val">float | 物理质量</span></div>
+        <div class="param-row"><span class="param-name">Sprite Rotation</span><span class="param-val">float | 初始旋转角度</span></div>
+        <div class="param-row"><span class="param-name">Mesh Scale</span><span class="param-val">Vector3 | 网格缩放</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-badge" style="background:var(--glow-blue);color:var(--accent-blue);">位置</div>
+      </div>
+      <div class="card-title">Shape Location</div>
+      <div class="card-text">从几何形状的表面或体积内随机生成粒子</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Shape</span><span class="param-val">Box / Sphere / Cone / Torus / Ring / Mesh</span></div>
+        <div class="param-row"><span class="param-name">Surface Only</span><span class="param-val">bool | 仅从表面生成</span></div>
+        <div class="param-row"><span class="param-name">Radius / Extents</span><span class="param-val">形状尺寸参数</span></div>
+        <div class="param-row"><span class="param-name">Distribution</span><span class="param-val">Random / Grid / Uniform</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-badge" style="background:var(--glow-orange);color:var(--accent-orange);">速度</div>
+      </div>
+      <div class="card-title">Add Velocity</div>
+      <div class="card-text">给粒子一个初始速度，使其朝特定方向运动</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Velocity</span><span class="param-val">Vector3 | (X, Y, Z) 速度分量</span></div>
+        <div class="param-row"><span class="param-name">Speed</span><span class="param-val">float | 速度标量</span></div>
+        <div class="param-row"><span class="param-name">Coordinate Space</span><span class="param-val">World / Local / Simulation</span></div>
+        <div class="param-row"><span class="param-name">Velocity in Cone</span><span class="param-val">锥形范围内随机方向</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-badge" style="background:var(--glow-purple);color:var(--accent-purple);">生成量</div>
+      </div>
+      <div class="card-title">生成模式对比</div>
+      <div class="card-text">三种主要的粒子生成方式</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Spawn Rate</span><span class="param-val">每秒 N 个（持续生成）</span></div>
+        <div class="param-row"><span class="param-name">Spawn Burst</span><span class="param-val">在指定时间点一次性爆发</span></div>
+        <div class="param-row"><span class="param-name">Spawn Per Frame</span><span class="param-val">每帧固定数量（帧率敏感）</span></div>
+        <div class="param-row"><span class="param-name">Spawn Per Unit</span><span class="param-val">每移动 N 距离生成（轨迹效果）</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SECTION: Update ====== -->
+<section class="section" id="update">
+  <div class="section-header">
+    <div class="section-icon" style="background:var(--glow-orange);color:var(--accent-orange);">⚙️</div>
+    <div>
+      <div class="section-title">Update 更新参数详解</div>
+    </div>
+  </div>
+  <p class="section-desc">Update 阶段决定粒子在存活期间的动态行为——运动轨迹、颜色变化、大小缩放等。这里是「让粒子活起来」的关键。</p>
+
+  <div class="collapsible open" onclick="toggleCollapsible(this)">
+    <div class="collapsible-header">
+      <div class="collapsible-title"><span style="color:var(--accent-cyan)">🎨</span> 颜色与透明度控制</div>
+      <div class="collapsible-arrow">▶</div>
+    </div>
+    <div class="collapsible-body"><div class="collapsible-content">
+      <table class="ref-table">
+        <thead><tr><th>模块</th><th>作用</th><th>参数</th></tr></thead>
+        <tbody>
+          <tr><td><code>Scale Color</code></td><td>随 NormalizedAge 缩放颜色/透明度</td><td>Scale RGB (Curve), Scale Alpha (Curve) — 最常用于淡入淡出</td></tr>
+          <tr><td><code>Color by Speed</code></td><td>根据粒子速度改变颜色</td><td>Min Speed, Max Speed, Color Range</td></tr>
+          <tr><td><code>Set Color</code></td><td>直接覆盖颜色</td><td>可绑定 Dynamic Input 实现复杂逻辑</td></tr>
+        </tbody>
+      </table>
+      <div class="tip-box">
+        <div class="tip-icon">🎯</div>
+        <div class="tip-text"><strong>曲线编辑器技巧：</strong>点击 Scale Alpha 旁的下拉箭头 → 选择 <code>Curve</code> 类型 → 可以画出 0→1→0 的曲线实现「淡入 → 维持 → 淡出」效果。横轴是 NormalizedAge (0~1)，纵轴是缩放倍率。</div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="collapsible" onclick="toggleCollapsible(this)">
+    <div class="collapsible-header">
+      <div class="collapsible-title"><span style="color:var(--accent-green)">📐</span> 大小与缩放控制</div>
+      <div class="collapsible-arrow">▶</div>
+    </div>
+    <div class="collapsible-body"><div class="collapsible-content">
+      <table class="ref-table">
+        <thead><tr><th>模块</th><th>作用</th><th>参数</th></tr></thead>
+        <tbody>
+          <tr><td><code>Scale Sprite Size</code></td><td>按曲线缩放 Sprite 大小</td><td>Scale Factor (Curve/Float)</td></tr>
+          <tr><td><code>Scale Mesh Size</code></td><td>按曲线缩放 Mesh 模型</td><td>Scale Factor (Vector3)</td></tr>
+          <tr><td><code>Scale Sprite Size by Speed</code></td><td>速度越快粒子越大/越小</td><td>Min Speed, Max Speed, Scale Range</td></tr>
+        </tbody>
+      </table>
+    </div></div>
+  </div>
+
+  <div class="collapsible" onclick="toggleCollapsible(this)">
+    <div class="collapsible-header">
+      <div class="collapsible-title"><span style="color:var(--accent-orange)">🌀</span> 旋转控制</div>
+      <div class="collapsible-arrow">▶</div>
+    </div>
+    <div class="collapsible-body"><div class="collapsible-content">
+      <table class="ref-table">
+        <thead><tr><th>参数</th><th>说明</th><th>值域</th></tr></thead>
+        <tbody>
+          <tr><td><code>Sprite Rotation Rate</code></td><td>每秒旋转角度</td><td>float (度/秒)，可随机范围</td></tr>
+          <tr><td><code>Mesh Rotation Rate</code></td><td>3D 模型各轴旋转速度</td><td>Vector3 (度/秒)</td></tr>
+          <tr><td><code>Sprite Facing</code></td><td>面片朝向模式</td><td>Face Camera / Face Camera with Position / Custom Facing / Velocity Aligned</td></tr>
+        </tbody>
+      </table>
+    </div></div>
+  </div>
+
+  <div class="collapsible" onclick="toggleCollapsible(this)">
+    <div class="collapsible-header">
+      <div class="collapsible-title"><span style="color:var(--accent-red)">💥</span> 碰撞检测</div>
+      <div class="collapsible-arrow">▶</div>
+    </div>
+    <div class="collapsible-body"><div class="collapsible-content">
+      <table class="ref-table">
+        <thead><tr><th>模式</th><th>适用</th><th>精度</th><th>性能</th></tr></thead>
+        <tbody>
+          <tr><td><code>CPU Raycast</code></td><td>CPU 模拟</td><td>★★★ 最精确</td><td>★☆☆ 最慢</td></tr>
+          <tr><td><code>GPU Scene Depth</code></td><td>GPU 模拟</td><td>★★☆ 仅屏幕内</td><td>★★★ 最快</td></tr>
+          <tr><td><code>GPU Distance Field</code></td><td>GPU 模拟</td><td>★★★ 全场景</td><td>★★☆ 中等</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px;">碰撞后行为：<code>Kill</code> 销毁 / <code>Bounce</code> 反弹（需设 Restitution 弹性系数） / <code>Stick</code> 粘附</p>
+    </div></div>
+  </div>
+</section>
+
+<!-- ====== SECTION: Render ====== -->
+<section class="section" id="render">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(247,120,186,0.15);color:var(--accent-pink);">🖼️</div>
+    <div>
+      <div class="section-title">Renderer 渲染器详解</div>
+    </div>
+  </div>
+  <p class="section-desc">渲染器决定粒子在屏幕上的可视化方式。选错渲染器 = 效果完全不对。下面是各类渲染器的对比和适用场景。</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title" style="color:var(--accent-blue);">🔲 Sprite Renderer</div>
+      <div class="card-text">最常用。将每个粒子渲染为一个面向摄像机的 2D 面片。<br><br><strong>适用：</strong>火花、灰尘、烟雾、光点、UI 粒子</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Material</span><span class="param-val">必须是 Unlit + Translucent 材质</span></div>
+        <div class="param-row"><span class="param-name">SubImage Size</span><span class="param-val">序列帧动画的行×列</span></div>
+        <div class="param-row"><span class="param-name">Sort Mode</span><span class="param-val">View Depth / Age / Custom</span></div>
+        <div class="param-row"><span class="param-name">Alignment</span><span class="param-val">Unaligned / Velocity / Custom</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--accent-green);">🧊 Mesh Renderer</div>
+      <div class="card-text">将每个粒子渲染为 3D 模型实例。<br><br><strong>适用：</strong>碎片、岩石、落叶、弹壳、冰块</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Particle Mesh</span><span class="param-val">StaticMesh 引用</span></div>
+        <div class="param-row"><span class="param-name">Override Material</span><span class="param-val">可覆盖模型材质</span></div>
+        <div class="param-row"><span class="param-name">Facing Mode</span><span class="param-val">默认使用粒子的旋转</span></div>
+        <div class="param-row"><span class="param-name">Enable Frustum Culling</span><span class="param-val">视锥裁剪开关</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--accent-orange);">🎗️ Ribbon Renderer</div>
+      <div class="card-text">将同一 Emitter 的粒子连成一条带状轨迹。<br><br><strong>适用：</strong>刀光拖尾、闪电弧线、轨迹线、彩带</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Ribbon Width</span><span class="param-val">带状宽度</span></div>
+        <div class="param-row"><span class="param-name">Max Tessellation</span><span class="param-val">细分精度</span></div>
+        <div class="param-row"><span class="param-name">Facing Mode</span><span class="param-val">Screen / Custom / Custom Side</span></div>
+        <div class="param-row"><span class="param-name">UV Behavior</span><span class="param-val">Stretch / Tile Based On Distance</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--accent-yellow);">💡 Light Renderer</div>
+      <div class="card-text">每个粒子生成一个动态点光源。<br><br><strong>适用：</strong>火焰照明、魔法光球、萤火虫</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Radius Scale</span><span class="param-val">光源半径倍率</span></div>
+        <div class="param-row"><span class="param-name">Intensity</span><span class="param-val">光源强度</span></div>
+        <div class="param-row"><span class="param-name">Color Binding</span><span class="param-val">绑定粒子颜色</span></div>
+        <div class="param-row"><span class="param-name">Affects Translucency</span><span class="param-val">是否照亮半透明物体</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-icon">💡</div>
+    <div class="tip-text"><strong>渲染器选择速查：</strong>需要 2D 面片？→ Sprite | 需要 3D 模型？→ Mesh | 需要拖尾/轨迹？→ Ribbon | 需要粒子发光照亮场景？→ Light | 需要贴花？→ Decal</div>
+  </div>
+</section>
+
+<!-- ====== SECTION: Forces ====== -->
+<section class="section" id="forces">
+  <div class="section-header">
+    <div class="section-icon" style="background:var(--glow-red);color:var(--accent-red);">🌊</div>
+    <div>
+      <div class="section-title">力与物理</div>
+    </div>
+  </div>
+  <p class="section-desc">力模块让粒子拥有物理行为。所有力模块必须在 <strong>Particle Update</strong> 中，且 <code>Solve Forces and Velocity</code> 必须放在最后。</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title" style="color:var(--accent-blue);">⬇️ Gravity Force</div>
+      <div class="card-text">施加恒定重力加速度</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Gravity</span><span class="param-val">Vector3 | 默认 (0,0,-980)</span></div>
+      </div>
+      <div class="card-text" style="margin-top:8px;font-size:12px;">UE 单位是厘米。-980 = -9.8 m/s²</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--accent-orange);">🌬️ Drag</div>
+      <div class="card-text">空气阻力，让粒子逐渐减速</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Drag</span><span class="param-val">float | 0 = 无阻力，10+ = 快速停止</span></div>
+      </div>
+      <div class="card-text" style="margin-top:8px;font-size:12px;">公式：速度每帧 × (1 - Drag × DeltaTime)</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--accent-purple);">🌀 Curl Noise Force</div>
+      <div class="card-text">柏林噪声力场，模拟烟雾/灵魂游荡的随机翻涌</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Noise Strength</span><span class="param-val">力的强度 (越大越剧烈)</span></div>
+        <div class="param-row"><span class="param-name">Noise Frequency</span><span class="param-val">噪声频率 (越高越碎)</span></div>
+        <div class="param-row"><span class="param-name">Pan Speed</span><span class="param-val">噪声场移动速度</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--accent-green);">🎯 Point Force</div>
+      <div class="card-text">从一个点向外推/向内吸引粒子</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Force Strength</span><span class="param-val">正 = 推开，负 = 吸引</span></div>
+        <div class="param-row"><span class="param-name">Force Position</span><span class="param-val">力场中心点世界坐标</span></div>
+        <div class="param-row"><span class="param-name">Falloff</span><span class="param-val">衰减曲线</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--accent-cyan);">🌪️ Vortex Force</div>
+      <div class="card-text">漩涡力，让粒子绕轴旋转</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Vortex Axis</span><span class="param-val">旋转轴方向</span></div>
+        <div class="param-row"><span class="param-name">Vortex Strength</span><span class="param-val">旋转力度</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--accent-pink);">📌 Solve Forces & Velocity</div>
+      <div class="card-text"><strong>必须的求解器！</strong>将所有力转化为实际位移。放在 Update 组最后。</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">位置</span><span class="param-val">必须在所有 Force 模块之后</span></div>
+        <div class="param-row"><span class="param-name">Mass Clamp</span><span class="param-val">质量钳制范围</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SECTION: Dynamic Input ====== -->
+<section class="section" id="dynamic">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(227,179,65,0.15);color:var(--accent-yellow);">🧩</div>
+    <div>
+      <div class="section-title">动态输入 Dynamic Inputs</div>
+    </div>
+  </div>
+  <p class="section-desc">Dynamic Input 是 Niagara 的灵魂功能之一——它让你不用写代码就能构建复杂的参数逻辑。点击任何参数值旁的下拉箭头，就能选择动态输入类型。</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title" style="color:var(--accent-cyan);">📈 Float from Curve</div>
+      <div class="card-text">将一个浮点值绑定到曲线。横轴通常是 <code>NormalizedAge</code>，实现随时间变化的效果。</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Curve Index</span><span class="param-val">NormalizedAge / Custom</span></div>
+        <div class="param-row"><span class="param-name">用途</span><span class="param-val">淡入淡出、大小缩放、速度衰减</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--accent-green);">🎲 Uniform Random</div>
+      <div class="card-text">在范围内均匀随机取值。每个粒子获得不同的值，增加自然感。</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Min / Max</span><span class="param-val">随机范围</span></div>
+        <div class="param-row"><span class="param-name">Seed Mode</span><span class="param-val">Deterministic / Non-deterministic</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--accent-purple);">🖩 Math Expression</div>
+      <div class="card-text">直接写数学表达式。支持 +, -, *, /, sin, cos, lerp, clamp 等。</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">输入</span><span class="param-val">可引用任何 Particle/Emitter 参数</span></div>
+        <div class="param-row"><span class="param-name">示例</span><span class="param-val">Particles.Velocity.Length() * 0.01</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--accent-orange);">🗺️ Sample Texture</div>
+      <div class="card-text">从贴图采样颜色/数据。可用于粒子沿贴图着色、读取 FlowMap 等。</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Texture</span><span class="param-val">Texture2D 引用</span></div>
+        <div class="param-row"><span class="param-name">UV</span><span class="param-val">采样坐标 (可绑定粒子位置)</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--accent-red);">🔀 Select / If</div>
+      <div class="card-text">条件分支——根据布尔值或整数选择不同的输出。相当于代码中的 if/switch。</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Selector</span><span class="param-val">Bool / Int / Enum</span></div>
+        <div class="param-row"><span class="param-name">True/False Value</span><span class="param-val">不同条件下的输出值</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--accent-blue);">📌 Make New / Map Get</div>
+      <div class="card-text">构造新的结构体或从命名空间中读取参数。是参数间互相引用的桥梁。</div>
+      <div class="card-params">
+        <div class="param-row"><span class="param-name">Map Get</span><span class="param-val">读取 Particles.XXX, Emitter.XXX 等</span></div>
+        <div class="param-row"><span class="param-name">Make Vector</span><span class="param-val">从分量构造向量</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SECTION: Data Interface ====== -->
+<section class="section" id="dataif">
+  <div class="section-header">
+    <div class="section-icon" style="background:var(--glow-cyan);color:var(--accent-cyan);">🔌</div>
+    <div>
+      <div class="section-title">数据接口 Data Interface</div>
+    </div>
+  </div>
+  <p class="section-desc">Data Interface 让 Niagara 可以读取外部数据——骨骼、网格、贴图、曲线、音频、蓝图变量等。它是 Niagara 与引擎其他系统沟通的桥梁。</p>
+
+  <div class="card-grid card-grid-3">
+    <div class="card">
+      <div class="card-title" style="font-size:14px;color:var(--accent-blue);">🦴 Skeletal Mesh DI</div>
+      <div class="card-text">从骨骼网格表面/骨骼位置采样。</div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">粒子沿角色身体表面生成</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="font-size:14px;color:var(--accent-green);">📐 Static Mesh DI</div>
+      <div class="card-text">从静态网格表面采样位置/法线。</div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">粒子沿模型表面分布</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="font-size:14px;color:var(--accent-orange);">🖼️ Texture DI</div>
+      <div class="card-text">采样 2D 贴图颜色值。</div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">用贴图数据驱动粒子颜色/位移</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="font-size:14px;color:var(--accent-purple);">📊 Curve DI</div>
+      <div class="card-text">读取外部曲线资产做插值。</div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">共享动画曲线给多个参数</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="font-size:14px;color:var(--accent-pink);">🔉 Audio Spectrum DI</div>
+      <div class="card-text">读取音频频谱数据。</div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">音乐可视化效果</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="font-size:14px;color:var(--accent-yellow);">🧭 Spline DI</div>
+      <div class="card-text">沿 Spline 组件采样位置/方向。</div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">粒子沿路径运动</p>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SECTION: 元素配方 ====== -->
+<section class="section" id="recipes">
+  <div class="section-header">
+    <div class="section-icon" style="background:var(--glow-orange);color:var(--accent-orange);">🔥</div>
+    <div>
+      <div class="section-title">元素配方 — 对应「元素神殿」教程</div>
+    </div>
+  </div>
+  <p class="section-desc">以下是火焰、闪电、冰霜三大元素的 Niagara 参数配方思路，帮助你在跟随教程时快速理解每个参数的作用和调节方向。</p>
+
+  <!-- FIRE -->
+  <div class="recipe-card">
+    <div class="recipe-banner" style="background:linear-gradient(90deg,#f85149,#d29922,#e3b341);"></div>
+    <div class="recipe-body">
+      <div class="recipe-title">🔥 火焰效果 Fire</div>
+      <div class="recipe-subtitle">火焰 = 向上喷发的粒子 + 颜色从亮黄到深红的渐变 + Curl Noise 翻涌 + 光照</div>
+
+      <div class="recipe-step">
+        <div class="step-num" style="background:var(--glow-orange);color:var(--accent-orange);">1</div>
+        <div class="step-content">
+          <div class="step-title">Emitter — 生成配置</div>
+          <div class="step-desc">使用 <code>Spawn Rate</code> 持续生成（30~100/秒）。Shape Location 设为 <strong>Cylinder</strong>（底部圆形区域），使粒子从火堆底部涌出。</div>
+          <div class="step-code">Spawn Rate: 50 | Shape: Cylinder (R=20, H=5) | Surface Only: false</div>
+        </div>
+      </div>
+
+      <div class="recipe-step">
+        <div class="step-num" style="background:var(--glow-orange);color:var(--accent-orange);">2</div>
+        <div class="step-content">
+          <div class="step-title">Particle Spawn — 初始属性</div>
+          <div class="step-desc">Lifetime 设 0.5~1.5 秒（火焰粒子短命）。Add Velocity 向上 (Z = 200~400)。初始颜色设为明亮的黄白色 (HDR, 强度>1 以发光)。</div>
+          <div class="step-code">Lifetime: Random(0.5, 1.5) | Velocity Z: Random(200, 400) | Color: (1.5, 1.2, 0.3, 1) HDR</div>
+        </div>
+      </div>
+
+      <div class="recipe-step">
+        <div class="step-num" style="background:var(--glow-orange);color:var(--accent-orange);">3</div>
+        <div class="step-content">
+          <div class="step-title">Particle Update — 动态行为</div>
+          <div class="step-desc"><code>Curl Noise Force</code> 给火焰翻涌感（Strength=300, Freq=1.5）。<code>Scale Color</code> 曲线让颜色从黄→橙→红→透明渐变。<code>Scale Sprite Size</code> 先膨胀后缩小。<code>Drag</code> = 2 让上升减速。</div>
+          <div class="step-code">Curl Noise: Strength=300, Freq=1.5 | Drag: 2 | Scale Alpha: 1→1→0 curve</div>
+        </div>
+      </div>
+
+      <div class="recipe-step">
+        <div class="step-num" style="background:var(--glow-orange);color:var(--accent-orange);">4</div>
+        <div class="step-content">
+          <div class="step-title">Renderer + 材质</div>
+          <div class="step-desc">Sprite Renderer + 柔和噪声贴图材质（Unlit + Additive）。额外加一个 <code>Light Renderer</code> 让火焰照亮周围环境。材质中用 <code>Particle Color</code> 节点接入 Emissive。</div>
+          <div class="step-code">Blend Mode: Additive | Emissive = ParticleColor * Intensity | Light Renderer: Radius=200, Intensity=5</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHTNING -->
+  <div class="recipe-card">
+    <div class="recipe-banner" style="background:linear-gradient(90deg,#58a6ff,#bc8cff,#58a6ff);"></div>
+    <div class="recipe-body">
+      <div class="recipe-title">⚡ 闪电效果 Lightning</div>
+      <div class="recipe-subtitle">闪电 = Beam/Ribbon 连线 + 随机偏移的锯齿路径 + 强烈的发光 + 短促的闪烁</div>
+
+      <div class="recipe-step">
+        <div class="step-num" style="background:var(--glow-blue);color:var(--accent-blue);">1</div>
+        <div class="step-content">
+          <div class="step-title">Emitter — Beam 模式</div>
+          <div class="step-desc">使用 <strong>Beam Emitter</strong> 模板或手动设置。<code>Spawn Burst</code> 一次生成 10~20 个点（构成闪电段数）。设置 Beam Start/End 位置。</div>
+          <div class="step-code">Spawn Burst: 15 points | Beam Start: Emitter Position | Beam End: Target Position</div>
+        </div>
+      </div>
+
+      <div class="recipe-step">
+        <div class="step-num" style="background:var(--glow-blue);color:var(--accent-blue);">2</div>
+        <div class="step-content">
+          <div class="step-title">Particle Spawn — 路径偏移</div>
+          <div class="step-desc">每个 Beam 点在起点与终点之间插值，加入 <code>Random Position Offset</code>（横向偏移 ±30~80 单位）模拟闪电的锯齿感。Lifetime 极短（0.05~0.15 秒）。</div>
+          <div class="step-code">Position: Lerp(Start, End, Index/Count) + Random Offset | Lifetime: Random(0.05, 0.15)</div>
+        </div>
+      </div>
+
+      <div class="recipe-step">
+        <div class="step-num" style="background:var(--glow-blue);color:var(--accent-blue);">3</div>
+        <div class="step-content">
+          <div class="step-title">Renderer — Ribbon</div>
+          <div class="step-desc">使用 <code>Ribbon Renderer</code>，按粒子 ID 顺序连线。宽度中间粗、两端细。材质用高 HDR 亮度的蓝白色 + <code>Fresnel</code> 边缘发光。</div>
+          <div class="step-code">Ribbon Width: Curve(thin→thick→thin) | Color: (3, 4, 8, 1) HDR Blue-White</div>
+        </div>
+      </div>
+
+      <div class="recipe-step">
+        <div class="step-num" style="background:var(--glow-blue);color:var(--accent-blue);">4</div>
+        <div class="step-content">
+          <div class="step-title">进阶 — 分叉与闪烁</div>
+          <div class="step-desc">用 <strong>Event Handler</strong> 从主闪电上随机触发子 Emitter（分叉）。整体加 <code>Emitter Update</code> 中的随机 Alpha 闪烁（每隔几帧随机隐藏/显示）。</div>
+          <div class="step-code">Branch Probability: 0.3 per segment | Flicker: Random Alpha 0~1 per frame</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ICE -->
+  <div class="recipe-card">
+    <div class="recipe-banner" style="background:linear-gradient(90deg,#39d2c0,#58a6ff,#bc8cff);"></div>
+    <div class="recipe-body">
+      <div class="recipe-title">❄️ 冰霜效果 Ice / Frost</div>
+      <div class="recipe-subtitle">冰霜 = 冰晶碎片（Mesh）+ 地面扩散冻结（Decal/Sprite）+ 冷气雾气 + 闪烁光泽</div>
+
+      <div class="recipe-step">
+        <div class="step-num" style="background:var(--glow-cyan);color:var(--accent-cyan);">1</div>
+        <div class="step-content">
+          <div class="step-title">Emitter A — 冰晶碎片</div>
+          <div class="step-desc"><code>Mesh Renderer</code> 使用低面数的冰晶模型。从中心向外爆发生成。<code>Spawn Burst</code> 一次性 10~30 个。Mesh 材质用半透明 + 折射 + 浅蓝色。</div>
+          <div class="step-code">Mesh: IceShard_SM | Burst: 20 | Scale: Random(0.5, 2.0) | Color: (0.7, 0.9, 1.0)</div>
+        </div>
+      </div>
+
+      <div class="recipe-step">
+        <div class="step-num" style="background:var(--glow-cyan);color:var(--accent-cyan);">2</div>
+        <div class="step-content">
+          <div class="step-title">Emitter B — 冰雾/冷气</div>
+          <div class="step-desc">低速、大粒子的 Sprite。<code>Curl Noise</code> 轻微翻涌（Strength=50）。颜色浅蓝半透明。<code>Drag</code> 高 (5~8) 让雾气缓慢漂浮。</div>
+          <div class="step-code">Spawn Rate: 15 | Size: Random(80, 200) | Drag: 6 | Alpha: 0.15~0.3</div>
+        </div>
+      </div>
+
+      <div class="recipe-step">
+        <div class="step-num" style="background:var(--glow-cyan);color:var(--accent-cyan);">3</div>
+        <div class="step-content">
+          <div class="step-title">Emitter C — 地面冻结扩散</div>
+          <div class="step-desc">使用 <code>Decal Renderer</code> 或平面 Sprite 贴在地面。从中心向外扩展（Scale 从 0 到 1 的曲线）。材质使用冰裂纹贴图 + 法线。</div>
+          <div class="step-code">Scale Curve: 0→1 over 0.5s | Decal Size: 500 | Lifetime: 3~5s then fade</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SECTION: 交互演示 ====== -->
+<section class="section" id="interactive">
+  <div class="section-header">
+    <div class="section-icon" style="background:var(--glow-blue);color:var(--accent-blue);">🎮</div>
+    <div>
+      <div class="section-title">交互演示 — 参数效果可视化</div>
+    </div>
+  </div>
+  <p class="section-desc">拖动滑块观察参数变化对粒子行为的影响。这些演示帮助你建立对核心参数值的直觉。</p>
+
+  <!-- Demo 1: Particle Simulation -->
+  <div class="demo-box">
+    <div class="demo-title">✨ 粒子发射模拟器</div>
+    <canvas id="particleCanvas" class="demo-canvas" style="height:280px;border-radius:8px;"></canvas>
+    <div class="slider-row">
+      <div class="slider-label"><code>Spawn Rate</code></div>
+      <input type="range" id="sliderSpawnRate" min="5" max="200" value="50">
+      <div class="slider-value" id="valSpawnRate">50</div>
+    </div>
+    <div class="slider-row">
+      <div class="slider-label"><code>Lifetime</code></div>
+      <input type="range" id="sliderLifetime" min="20" max="300" value="120">
+      <div class="slider-value" id="valLifetime">1.2s</div>
+    </div>
+    <div class="slider-row">
+      <div class="slider-label"><code>Velocity Y</code></div>
+      <input type="range" id="sliderVelocity" min="20" max="400" value="150">
+      <div class="slider-value" id="valVelocity">150</div>
+    </div>
+    <div class="slider-row">
+      <div class="slider-label"><code>Gravity</code></div>
+      <input type="range" id="sliderGravity" min="0" max="500" value="100">
+      <div class="slider-value" id="valGravity">100</div>
+    </div>
+    <div class="slider-row">
+      <div class="slider-label"><code>Drag</code></div>
+      <input type="range" id="sliderDrag" min="0" max="100" value="10">
+      <div class="slider-value" id="valDrag">0.10</div>
+    </div>
+    <div class="slider-row">
+      <div class="slider-label"><code>Size</code></div>
+      <input type="range" id="sliderSize" min="2" max="20" value="6">
+      <div class="slider-value" id="valSize">6</div>
+    </div>
+    <div class="slider-row">
+      <div class="slider-label"><code>Spread</code> 扩散角</div>
+      <input type="range" id="sliderSpread" min="0" max="180" value="30">
+      <div class="slider-value" id="valSpread">30°</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+      <button onclick="setPreset('fire')" style="padding:6px 16px;border:1px solid #d29922;background:rgba(210,153,34,0.1);color:#d29922;border-radius:6px;cursor:pointer;font-family:inherit;">🔥 火焰预设</button>
+      <button onclick="setPreset('snow')" style="padding:6px 16px;border:1px solid #58a6ff;background:rgba(88,166,255,0.1);color:#58a6ff;border-radius:6px;cursor:pointer;font-family:inherit;">❄️ 雪花预设</button>
+      <button onclick="setPreset('spark')" style="padding:6px 16px;border:1px solid #e3b341;background:rgba(227,179,65,0.1);color:#e3b341;border-radius:6px;cursor:pointer;font-family:inherit;">✨ 火花预设</button>
+      <button onclick="setPreset('smoke')" style="padding:6px 16px;border:1px solid #8b949e;background:rgba(139,148,158,0.1);color:#8b949e;border-radius:6px;cursor:pointer;font-family:inherit;">🌫️ 烟雾预设</button>
+      <button onclick="setPreset('fountain')" style="padding:6px 16px;border:1px solid #3fb950;background:rgba(63,185,80,0.1);color:#3fb950;border-radius:6px;cursor:pointer;font-family:inherit;">⛲ 喷泉预设</button>
+    </div>
+  </div>
+
+  <!-- Demo 2: Curve Editor with Bezier Handles -->
+  <div class="demo-box">
+    <div class="demo-title">📈 生命周期曲线可视化 — Scale Alpha over Life（贝塞尔手柄版）</div>
+    <canvas id="curveCanvas" style="width:100%;height:280px;background:var(--bg-primary);border-radius:8px;cursor:crosshair;"></canvas>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">
+      <strong style="color:var(--accent-blue);">拖拽</strong> 圆点移动 |
+      <strong style="color:var(--accent-orange);">拖拽</strong> 菱形手柄调曲率 |
+      <strong style="color:var(--text-secondary);">点击空白</strong> 新增点 |
+      <strong style="color:var(--accent-red);">右键</strong> 删除 |
+      <strong style="color:var(--accent-yellow);">双击</strong> 切换 Aligned <span style="color:var(--accent-orange);">&#9670;</span> / Broken <span style="color:var(--accent-red);">&#10006;</span> 模式
+    </p>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+      <button onclick="resetBezierCurve('fadeout')" style="padding:4px 12px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-secondary);border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;">线性淡出</button>
+      <button onclick="resetBezierCurve('pulse')" style="padding:4px 12px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-secondary);border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;">脉冲</button>
+      <button onclick="resetBezierCurve('fadeinout')" style="padding:4px 12px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-secondary);border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;">淡入淡出</button>
+      <button onclick="resetBezierCurve('burst')" style="padding:4px 12px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-secondary);border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;">爆发衰减</button>
+      <button onclick="resetBezierCurve('easeInOut')" style="padding:4px 12px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-secondary);border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;">缓入缓出</button>
+      <button onclick="resetBezierCurve('sharp')" style="padding:4px 12px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-secondary);border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;">尖峰</button>
+    </div>
+    <div class="tip-box" style="margin-top:12px;">
+      <div class="tip-icon">💡</div>
+      <div class="tip-text">
+        <strong style="color:var(--accent-orange);">Aligned 模式</strong>（默认）= 左右手柄共线对接，拖动一端另一端自动镜像跟随，曲线过该点平滑连续——对应 UE 中的 Auto/Smooth 切线。<br>
+        <strong style="color:var(--accent-red);">Broken 模式</strong> = 左右手柄独立，可以制造尖角/急转——对应 UE 中的 Broken 切线。<br>
+        <strong>双击</strong>控制点可在两种模式间切换，控制点中央的符号会变化（圆点 = Aligned，✕ = Broken）。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SECTION: 速查问答 ====== -->
+<section class="section" id="cheat">
+  <div class="section-header">
+    <div class="section-icon" style="background:var(--glow-green);color:var(--accent-green);">⚡</div>
+    <div>
+      <div class="section-title">速查问答 — 常见问题</div>
+    </div>
+  </div>
+
+  <div class="cheat-grid" id="cheatGrid">
+    <div class="cheat-item"><div class="cheat-q">粒子不动？</div><div class="cheat-a">检查 Particle Update 中是否有 <code>Solve Forces and Velocity</code> 模块，且在所有 Force 之后。</div></div>
+    <div class="cheat-item"><div class="cheat-q">粒子看不见？</div><div class="cheat-a">1. 检查 Renderer 是否存在 2. 材质是否正确绑定 3. <code>Sprite Size</code> 是否太小 4. Color Alpha 是否 > 0</div></div>
+    <div class="cheat-item"><div class="cheat-q">CPU 还是 GPU 模拟？</div><div class="cheat-a"><code>Emitter Properties → Sim Target</code>。GPU 支持百万粒子但无法精确碰撞；CPU 精确但数量受限（千级）。</div></div>
+    <div class="cheat-item"><div class="cheat-q">Local Space 和 World Space 区别？</div><div class="cheat-a">Local Space: 粒子跟随 System 移动。World Space: 粒子生成后留在原地。火焰用 Local，拖尾用 World。</div></div>
+    <div class="cheat-item"><div class="cheat-q">怎么让粒子颜色随时间变？</div><div class="cheat-a">Particle Update → <code>Scale Color</code>。将 Scale RGB 和 Scale Alpha 设为 <code>Float from Curve</code>，横轴绑定 NormalizedAge。</div></div>
+    <div class="cheat-item"><div class="cheat-q">Ribbon 拖尾断裂？</div><div class="cheat-a">检查 <code>Ribbon ID</code> 绑定是否正确。粒子必须有连续的 ID。也可能是 Spawn Rate 太低导致点间距太大。</div></div>
+    <div class="cheat-item"><div class="cheat-q">怎么让不同 Emitter 交互？</div><div class="cheat-a">使用 <code>Event Handler</code>。发送端 <code>Generate Event</code> → 接收端 <code>Receive Event</code>。可传递 Position, Velocity, Color 等。</div></div>
+    <div class="cheat-item"><div class="cheat-q">Niagara 性能优化？</div><div class="cheat-a">1. 降低 Spawn Rate 2. 缩短 Lifetime 3. 用 GPU Sim 4. 设 Fixed Bounds 5. 减少 Overdraw（调小 Sprite Size）6. Scalability 降级</div></div>
+    <div class="cheat-item"><div class="cheat-q">怎么用蓝图控制 Niagara？</div><div class="cheat-a">在 System 中定义 <code>User Parameters</code>，蓝图中用 <code>Set Niagara Variable</code> 节点运行时修改。支持 Float, Vector, Color 等类型。</div></div>
+    <div class="cheat-item"><div class="cheat-q">Custom Module 怎么写？</div><div class="cheat-a">在 Scratch Pad 中创建模块。用节点图或 Custom HLSL 表达式。输入/输出绑定到 Map Get / Map Set。</div></div>
+    <div class="cheat-item"><div class="cheat-q">粒子穿模了？</div><div class="cheat-a">添加 <code>Collision</code> 模块。GPU 用 Scene Depth 或 Distance Field；CPU 用 Raycast。记住碰撞模块要在 Solve 之前。</div></div>
+    <div class="cheat-item"><div class="cheat-q">Deterministic 是什么？</div><div class="cheat-a">确定性模拟 = 相同种子和参数下每次播放效果完全一致。适用于过场动画。<code>Emitter Properties → Determinism</code> 开启。</div></div>
+  </div>
+</section>
+
+<!-- ====== SECTION: 学习路径 ====== -->
+<section class="section" id="path">
+  <div class="section-header">
+    <div class="section-icon" style="background:var(--glow-purple);color:var(--accent-purple);">🗺️</div>
+    <div>
+      <div class="section-title">学习路径 — 配合元素神殿高效学习</div>
+    </div>
+  </div>
+  <p class="section-desc">以下路径专为学习「Moon 元素神殿」教程优化。按阶段循序渐进，每个阶段搭配官方文档和实践目标。</p>
+
+  <div class="path-timeline">
+    <div class="path-item" style="border-left:3px solid var(--accent-blue);">
+      <div style="position:absolute;left:-26px;top:20px;width:12px;height:12px;border-radius:50%;border:2px solid var(--accent-blue);background:var(--bg-primary);"></div>
+      <div class="path-item-phase" style="color:var(--accent-blue);">阶段 1 · 基础认知 (1~2 天)</div>
+      <div class="path-item-title">理解 Niagara 四层架构</div>
+      <div class="path-item-desc">
+        目标：能准确说出 System → Emitter → Particle → Renderer 的嵌套关系和各自职责。<br>
+        实践：创建一个空的 Niagara System，手动添加 Emitter、设置 Spawn Rate，观察默认粒子。<br>
+        重点阅读本页「系统架构总览」和「粒子生命周期」章节。
+      </div>
+      <div class="path-item-links">
+        <a class="path-link" href="https://dev.epicgames.com/documentation/en-us/unreal-engine/overview-of-niagara-effects-for-unreal-engine" target="_blank">📖 Niagara Overview</a>
+        <a class="path-link" href="#arch">📌 本页架构章节</a>
+      </div>
+    </div>
+
+    <div class="path-item" style="border-left:3px solid var(--accent-green);">
+      <div style="position:absolute;left:-26px;top:20px;width:12px;height:12px;border-radius:50%;border:2px solid var(--accent-green);background:var(--bg-primary);"></div>
+      <div class="path-item-phase" style="color:var(--accent-green);">阶段 2 · 核心参数 (3~5 天)</div>
+      <div class="path-item-title">掌握 Spawn/Update/Render 三大组</div>
+      <div class="path-item-desc">
+        目标：熟练使用 Initialize Particle、Shape Location、Add Velocity、Gravity、Drag、Scale Color、Solve Forces。<br>
+        实践：用纯参数（不写代码）做出「向上的火花」「下落的雨滴」「飘散的灰尘」三个效果。<br>
+        利用本页「交互演示」反复调节滑块建立参数直觉。
+      </div>
+      <div class="path-item-links">
+        <a class="path-link" href="https://dev.epicgames.com/documentation/en-us/unreal-engine/particle-spawn-group-reference-for-niagara-effects-in-unreal-engine" target="_blank">📖 Particle Spawn Ref</a>
+        <a class="path-link" href="https://dev.epicgames.com/documentation/en-us/unreal-engine/particle-update-group-reference-for-niagara-effects-in-unreal-engine" target="_blank">📖 Particle Update Ref</a>
+        <a class="path-link" href="#interactive">📌 本页交互演示</a>
+      </div>
+    </div>
+
+    <div class="path-item" style="border-left:3px solid var(--accent-orange);">
+      <div style="position:absolute;left:-26px;top:20px;width:12px;height:12px;border-radius:50%;border:2px solid var(--accent-orange);background:var(--bg-primary);"></div>
+      <div class="path-item-phase" style="color:var(--accent-orange);">阶段 3 · 渲染与材质 (3~5 天)</div>
+      <div class="path-item-title">Renderer 选型 + 特效材质基础</div>
+      <div class="path-item-desc">
+        目标：能根据效果类型选择正确的 Renderer，掌握 Unlit + Translucent/Additive 材质的制作。<br>
+        实践：用 Sprite Renderer + SubUV 做序列帧烟雾。用 Ribbon Renderer 做简单拖尾。用 Mesh Renderer 做碎片飞散。<br>
+        材质关键节点：Particle Color、Particle SubUV、Depth Fade、Fresnel。
+      </div>
+      <div class="path-item-links">
+        <a class="path-link" href="https://dev.epicgames.com/documentation/en-us/unreal-engine/render-module-reference-for-niagara-effects-in-unreal-engine" target="_blank">📖 Render Module Ref</a>
+        <a class="path-link" href="#render">📌 本页渲染器章节</a>
+      </div>
+    </div>
+
+    <div class="path-item" style="border-left:3px solid var(--accent-purple);">
+      <div style="position:absolute;left:-26px;top:20px;width:12px;height:12px;border-radius:50%;border:2px solid var(--accent-purple);background:var(--bg-primary);"></div>
+      <div class="path-item-phase" style="color:var(--accent-purple);">阶段 4 · 进阶技巧 (1~2 周)</div>
+      <div class="path-item-title">Dynamic Input + Event + Data Interface</div>
+      <div class="path-item-desc">
+        目标：掌握曲线驱动、数学表达式、跨 Emitter 事件通信、从骨骼网格采样。<br>
+        实践：用 Event Handler 做「子弹碰撞产生火花」。用 Skeletal Mesh DI 做角色身上的火焰附着。用 Curl Noise + Scale Curve 做体积烟雾。<br>
+        这个阶段对应元素神殿中的核心技能效果制作。
+      </div>
+      <div class="path-item-links">
+        <a class="path-link" href="#dynamic">📌 本页动态输入章节</a>
+        <a class="path-link" href="#dataif">📌 本页数据接口章节</a>
+      </div>
+    </div>
+
+    <div class="path-item" style="border-left:3px solid var(--accent-yellow);">
+      <div style="position:absolute;left:-26px;top:20px;width:12px;height:12px;border-radius:50%;border:2px solid var(--accent-yellow);background:var(--bg-primary);"></div>
+      <div class="path-item-phase" style="color:var(--accent-yellow);">阶段 5 · 元素实战 (持续)</div>
+      <div class="path-item-title">跟随元素神殿课程实战 🔥⚡❄️</div>
+      <div class="path-item-desc">
+        目标：完成课程中的火焰、闪电、冰霜三大元素效果，并能举一反三。<br>
+        方法：遇到不理解的参数 → 回到本页速查 → 在交互演示中实验 → 回到 UE 里验证。<br>
+        参考本页「元素配方」章节获取每种效果的参数思路。
+      </div>
+      <div class="path-item-links">
+        <a class="path-link" href="https://www.realtime.xyz/moon" target="_blank">🌙 元素神殿课程</a>
+        <a class="path-link" href="#recipes">📌 本页元素配方</a>
+        <a class="path-link" href="#cheat">📌 速查问答</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-icon">🎯</div>
+    <div class="tip-text">
+      <strong>高效学习法则：</strong><br>
+      1. <strong>先调参数再看代码</strong> — 用内置模块理解效果原理，再考虑自定义<br>
+      2. <strong>多拆解优秀作品</strong> — 下载元素神殿的演示工程，逐个 Emitter 研究参数<br>
+      3. <strong>建立自己的预设库</strong> — 每学完一个效果就保存为模板<br>
+      4. <strong>录制 A/B 对比</strong> — 修改一个参数前后对比截图/录屏，加深记忆
+    </div>
+  </div>
+</section>
+
+<!-- ====== SECTION: 思维导图 ====== -->
+<section class="section" id="mindmap">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(227,179,65,0.15);color:var(--accent-yellow);">🧠</div>
+    <div>
+      <div class="section-title">思维导图 & 学习脉络</div>
+    </div>
+  </div>
+  <p class="section-desc">将 Niagara 的知识体系可视化。先建立全局认知框架，再逐个击破——这是学习复杂系统最高效的路径。</p>
+
+  <!-- === 知识结构导图 === -->
+  <h3 style="margin-bottom:16px;font-size:17px;display:flex;align-items:center;gap:8px;">
+    <span style="color:var(--accent-blue);">&#9670;</span> Niagara 知识结构全景图
+  </h3>
+  <div class="mindmap-container">
+    <div class="mm-tree">
+      <div class="mm-root">
+        <div class="mm-root-node">Niagara VFX System</div>
+      </div>
+      <div class="mm-branches">
+
+        <div class="mm-branch">
+          <div class="mm-branch-head" style="background:linear-gradient(135deg,#1a2744,#1d2d50);color:#58a6ff;">
+            架构层级
+          </div>
+          <div class="mm-leaves">
+            <div class="mm-leaf"><strong>System</strong> — 场景中的实体</div>
+            <div class="mm-leaf"><strong>Emitter</strong> — 发射行为单元</div>
+            <div class="mm-leaf"><strong>Module</strong> — 可插拔的功能块</div>
+            <div class="mm-leaf"><strong>Parameter</strong> — 数据驱动一切</div>
+            <div class="mm-leaf"><strong>Renderer</strong> — 视觉输出</div>
+          </div>
+        </div>
+
+        <div class="mm-branch">
+          <div class="mm-branch-head" style="background:linear-gradient(135deg,#1f2a1f,#243024);color:#3fb950;">
+            执行阶段
+          </div>
+          <div class="mm-leaves">
+            <div class="mm-leaf"><strong>Emitter Spawn</strong> — 初始化一次</div>
+            <div class="mm-leaf"><strong>Emitter Update</strong> — 帧级控制</div>
+            <div class="mm-leaf"><strong>Particle Spawn</strong> — 出生设定</div>
+            <div class="mm-leaf"><strong>Particle Update</strong> — 逐帧演化</div>
+            <div class="mm-leaf"><strong>Event Handler</strong> — 跨发射器</div>
+          </div>
+        </div>
+
+        <div class="mm-branch">
+          <div class="mm-branch-head" style="background:linear-gradient(135deg,#2a2420,#302820);color:#d29922;">
+            核心能力
+          </div>
+          <div class="mm-leaves">
+            <div class="mm-leaf"><strong>生成</strong> — Rate / Burst / PerUnit</div>
+            <div class="mm-leaf"><strong>力场</strong> — Gravity / Curl / Vortex</div>
+            <div class="mm-leaf"><strong>渲染</strong> — Sprite / Mesh / Ribbon</div>
+            <div class="mm-leaf"><strong>曲线</strong> — Color/Size over Life</div>
+            <div class="mm-leaf"><strong>碰撞</strong> — Depth / DF / Raycast</div>
+          </div>
+        </div>
+
+        <div class="mm-branch">
+          <div class="mm-branch-head" style="background:linear-gradient(135deg,#2a1f2a,#301f30);color:#bc8cff;">
+            进阶系统
+          </div>
+          <div class="mm-leaves">
+            <div class="mm-leaf"><strong>Dynamic Input</strong> — 无代码逻辑</div>
+            <div class="mm-leaf"><strong>Data Interface</strong> — 外部数据桥</div>
+            <div class="mm-leaf"><strong>Custom Module</strong> — HLSL/Scratch</div>
+            <div class="mm-leaf"><strong>Events</strong> — 粒子间通信</div>
+            <div class="mm-leaf"><strong>Simulation Stage</strong> — GPU 多阶段</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- === 效果设计思考框架 === -->
+  <h3 style="margin:32px 0 16px;font-size:17px;display:flex;align-items:center;gap:8px;">
+    <span style="color:var(--accent-orange);">&#9670;</span> 效果设计思考框架 — 「五问法」
+  </h3>
+  <p class="section-desc">每次设计一个新的 VFX 效果时，按以下 5 个维度逐一思考，能帮助你快速拆解需求、避免遗漏。</p>
+
+  <div class="think-grid">
+    <div class="think-card" style="border-top-color:var(--accent-blue);position:relative;">
+      <div class="think-card-title"><span style="color:var(--accent-blue);">Q1</span> 形态是什么？</div>
+      <div class="think-card-body">
+        决定视觉呈现方式，直接关联 <strong>Renderer</strong> 选型。
+        <ol>
+          <li>点状/片状 → <code>Sprite Renderer</code></li>
+          <li>3D 碎片/模型 → <code>Mesh Renderer</code></li>
+          <li>线条/拖尾/弧线 → <code>Ribbon Renderer</code></li>
+          <li>地面痕迹 → <code>Decal Renderer</code></li>
+          <li>自发光照亮场景 → 额外加 <code>Light Renderer</code></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="think-card" style="border-top-color:var(--accent-green);position:relative;">
+      <div class="think-card-title"><span style="color:var(--accent-green);">Q2</span> 从哪里来？</div>
+      <div class="think-card-body">
+        决定粒子的 <strong>生成方式和初始位置</strong>。
+        <ol>
+          <li>一个点 → 默认 / <code>Set Position</code></li>
+          <li>几何形状区域 → <code>Shape Location</code></li>
+          <li>沿模型表面 → <code>Mesh / Skeletal Mesh DI</code></li>
+          <li>沿路径生成 → <code>Spline DI</code></li>
+          <li>爆发 vs 持续 → Burst vs Rate</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="think-card" style="border-top-color:var(--accent-orange);position:relative;">
+      <div class="think-card-title"><span style="color:var(--accent-orange);">Q3</span> 怎么动？</div>
+      <div class="think-card-body">
+        决定运动行为，配置 <strong>力场和速度</strong>。
+        <ol>
+          <li>直线飞射 → <code>Add Velocity</code> + 低 Drag</li>
+          <li>受重力抛物线 → <code>Gravity Force</code></li>
+          <li>随机翻涌 → <code>Curl Noise Force</code></li>
+          <li>旋转涡流 → <code>Vortex Force</code></li>
+          <li>被吸引/推开 → <code>Point Force</code></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="think-card" style="border-top-color:var(--accent-purple);position:relative;">
+      <div class="think-card-title"><span style="color:var(--accent-purple);">Q4</span> 怎么变？</div>
+      <div class="think-card-body">
+        决定生命周期内的 <strong>视觉渐变</strong>。
+        <ol>
+          <li>颜色渐变 → <code>Scale Color</code> + 曲线</li>
+          <li>大小缩放 → <code>Scale Sprite Size</code> + 曲线</li>
+          <li>透明度淡入淡出 → Scale Alpha 曲线</li>
+          <li>旋转 → <code>Sprite Rotation Rate</code></li>
+          <li>序列帧动画 → <code>SubUV Animation</code></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="think-card" style="border-top-color:var(--accent-red);position:relative;">
+      <div class="think-card-title"><span style="color:var(--accent-red);">Q5</span> 怎么交互？</div>
+      <div class="think-card-body">
+        决定粒子与环境/其他系统的 <strong>互动方式</strong>。
+        <ol>
+          <li>碰撞地面 → <code>Collision</code> 模块</li>
+          <li>触发次级效果 → <code>Event Handler</code></li>
+          <li>蓝图运行时控制 → <code>User Parameters</code></li>
+          <li>响应音频 → <code>Audio Spectrum DI</code></li>
+          <li>LOD/Scalability → 性能分级</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="think-card" style="border-top-color:var(--accent-cyan);position:relative;">
+      <div class="think-card-title"><span style="color:var(--accent-cyan);">&#128161;</span> 调试检查清单</div>
+      <div class="think-card-body">
+        效果不对时的排查顺序：
+        <ol>
+          <li>Renderer 存在？材质正确？</li>
+          <li>Spawn Rate > 0？Lifetime > 0？</li>
+          <li>Size/Color/Alpha 是否可见？</li>
+          <li>Solve Forces 在力模块之后？</li>
+          <li>Local/World Space 选对了？</li>
+          <li>GPU vs CPU 模式匹配？</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- === 拆解案例的思维模板 === -->
+  <h3 style="margin:32px 0 16px;font-size:17px;display:flex;align-items:center;gap:8px;">
+    <span style="color:var(--accent-green);">&#9670;</span> 案例拆解模板 — 学习笔记框架
+  </h3>
+  <p class="section-desc">学习每个案例时，按这个模板做笔记，能帮你建立系统化的知识库。每完成一个效果就填写一份。</p>
+
+  <div class="diagram-container" style="padding:24px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div style="font-weight:700;font-size:14px;color:var(--accent-blue);margin-bottom:10px;">&#128196; 效果信息</div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:2;">
+          效果名称：________________<br>
+          对应课程章节：________________<br>
+          核心 Emitter 数量：_____ 个<br>
+          模拟模式：□ CPU &nbsp; □ GPU<br>
+          坐标空间：□ Local &nbsp; □ World
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:700;font-size:14px;color:var(--accent-green);margin-bottom:10px;">&#127912; 视觉拆解</div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:2;">
+          Renderer 类型：□ Sprite □ Mesh □ Ribbon □ Light<br>
+          材质混合模式：□ Additive □ Translucent □ Opaque<br>
+          关键材质节点：________________<br>
+          是否使用 SubUV：□ 是 &nbsp; □ 否<br>
+          后期效果：□ Bloom □ DOF □ 其他 ________
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:700;font-size:14px;color:var(--accent-orange);margin-bottom:10px;">&#9881; 参数记录</div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:2;">
+          Spawn Rate / Burst Count：_____<br>
+          Lifetime 范围：_____ ~ _____ 秒<br>
+          Velocity 范围：_____ ~ _____<br>
+          关键力场：________________<br>
+          关键曲线：________________
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:700;font-size:14px;color:var(--accent-purple);margin-bottom:10px;">&#128161; 学习心得</div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:2;">
+          这个效果最核心的技巧：________________<br>
+          可以复用到其他效果的模块：________________<br>
+          自己改进的想法：________________<br>
+          踩过的坑：________________
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === 分章节笔记系统 === -->
+  <h3 style="margin:32px 0 16px;font-size:17px;display:flex;align-items:center;gap:8px;">
+    <span style="color:var(--accent-pink);">&#9670;</span> 学习笔记 — 分章节自动存档
+  </h3>
+  <p class="section-desc">每个章节都有独立的笔记区域，自动保存到浏览器本地。点击「导出全部笔记」可下载为 <code>.md</code> Markdown 文件，方便在 Obsidian / Typora / VS Code 中查看。</p>
+
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+    <button id="btnExportMd" style="padding:8px 20px;border:1px solid var(--accent-green);background:rgba(63,185,80,0.1);color:var(--accent-green);border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;">&#128229; 导出全部笔记为 .md</button>
+    <button id="btnExportJson" style="padding:8px 20px;border:1px solid var(--accent-blue);background:rgba(88,166,255,0.1);color:var(--accent-blue);border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;">&#128190; 导出备份 .json</button>
+    <button id="btnImportJson" style="padding:8px 20px;border:1px solid var(--accent-orange);background:rgba(210,153,34,0.1);color:var(--accent-orange);border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;">&#128194; 导入备份 .json</button>
+    <input type="file" id="importFile" accept=".json" style="display:none;">
+    <span id="noteStatus" style="font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:4px;margin-left:8px;"></span>
+  </div>
+
+  <div id="sectionNotesContainer"></div>
+
+  <!-- 总览/自由笔记 -->
+  <div class="notes-area" style="margin-top:16px;">
+    <div class="notes-label">&#128221; 自由笔记 — 不归属任何章节的随想（Markdown 语法）</div>
+    <textarea id="userNotesFree" placeholder="在这里写不属于特定章节的笔记...&#10;&#10;支持 Markdown 语法：&#10;# 标题&#10;- 列表项&#10;**加粗** *斜体* `代码`&#10;> 引用"></textarea>
+  </div>
+
+  <!-- === 元素神殿课程对照表 === -->
+  <h3 style="margin:32px 0 16px;font-size:17px;display:flex;align-items:center;gap:8px;">
+    <span style="color:var(--accent-cyan);">&#9670;</span> 「元素神殿」课程内容对照
+  </h3>
+  <p class="section-desc">将课程中涉及的核心知识点映射到本手册对应章节，方便你在学习课程时快速查阅。</p>
+  <table class="ref-table">
+    <thead><tr><th>课程主题</th><th>核心知识点</th><th>本手册参考章节</th></tr></thead>
+    <tbody>
+      <tr><td>Niagara 基础</td><td>System/Emitter/Particle 层级、堆栈执行顺序</td><td><a href="#arch" style="color:var(--accent-blue);">架构总览</a> / <a href="#lifecycle" style="color:var(--accent-blue);">生命周期</a></td></tr>
+      <tr><td>粒子生成与初始化</td><td>Spawn Rate, Initialize Particle, Shape Location</td><td><a href="#spawn" style="color:var(--accent-blue);">Spawn 生成</a> / <a href="#stack" style="color:var(--accent-blue);">模块堆栈</a></td></tr>
+      <tr><td>材质系统</td><td>Particle Color, SubUV, Depth Fade, Fresnel</td><td><a href="#render" style="color:var(--accent-blue);">Renderer 渲染器</a></td></tr>
+      <tr><td>🔥 火焰效果</td><td>Curl Noise, Scale Color, Light Renderer, Additive</td><td><a href="#recipes" style="color:var(--accent-blue);">元素配方·火焰</a> / <a href="#forces" style="color:var(--accent-blue);">力与物理</a></td></tr>
+      <tr><td>⚡ 闪电效果</td><td>Beam, Ribbon, Event Handler, HDR Emissive</td><td><a href="#recipes" style="color:var(--accent-blue);">元素配方·闪电</a> / <a href="#render" style="color:var(--accent-blue);">Ribbon 渲染器</a></td></tr>
+      <tr><td>❄️ 冰霜效果</td><td>Mesh Renderer, Decal, Refraction, Freeze Spread</td><td><a href="#recipes" style="color:var(--accent-blue);">元素配方·冰霜</a> / <a href="#render" style="color:var(--accent-blue);">Mesh 渲染器</a></td></tr>
+      <tr><td>蓝图交互</td><td>User Parameters, Set Niagara Variable, Sequencer</td><td><a href="#dynamic" style="color:var(--accent-blue);">动态输入</a> / <a href="#cheat" style="color:var(--accent-blue);">速查问答</a></td></tr>
+      <tr><td>后期效果</td><td>Bloom, Post Process Volume, Camera Effects</td><td><a href="#render" style="color:var(--accent-blue);">Renderer 渲染器</a></td></tr>
+      <tr><td>性能优化</td><td>GPU Sim, Fixed Bounds, Scalability, Overdraw</td><td><a href="#cheat" style="color:var(--accent-blue);">速查问答·性能</a></td></tr>
+    </tbody>
+  </table>
+
+</section>
+
+</main>
+</div>
+
+<!-- Back to Top -->
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- ============ JAVASCRIPT ============ -->
+<script>
+/* === Navigation === */
+const navItems = document.querySelectorAll('.nav-item');
+const sections = document.querySelectorAll('.section');
+
+function updateActiveNav() {
+  let current = '';
+  sections.forEach(s => {
+    const top = s.offsetTop - 100;
+    if (window.scrollY >= top) current = s.id;
+  });
+  navItems.forEach(n => {
+    n.classList.toggle('active', n.dataset.section === current);
+  });
+}
+
+window.addEventListener('scroll', () => {
+  updateActiveNav();
+  document.getElementById('backTop').classList.toggle('visible', window.scrollY > 400);
+});
+
+/* === Stack Diagram Toggle === */
+function toggleStack(el) {
+  el.classList.toggle('active');
+}
+
+/* === Collapsible === */
+function toggleCollapsible(el) {
+  el.classList.toggle('open');
+}
+
+/* === Tabs === */
+document.querySelectorAll('.tabs').forEach(tabGroup => {
+  tabGroup.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabId = btn.dataset.tab;
+      tabGroup.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const parent = tabGroup.parentElement;
+      parent.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+      parent.querySelector('#tab-' + tabId).classList.add('active');
+    });
+  });
+});
+
+/* === Search === */
+const searchInput = document.getElementById('globalSearch');
+searchInput.addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  document.querySelectorAll('.highlight-match').forEach(el => {
+    el.outerHTML = el.textContent;
+  });
+  if (q.length < 2) return;
+
+  const walk = (node) => {
+    if (node.nodeType === 3) {
+      const idx = node.textContent.toLowerCase().indexOf(q);
+      if (idx >= 0) {
+        const span = document.createElement('span');
+        span.className = 'highlight-match';
+        const range = document.createRange();
+        range.setStart(node, idx);
+        range.setEnd(node, idx + q.length);
+        range.surroundContents(span);
+        return true;
+      }
+    } else if (node.nodeType === 1 && !['SCRIPT','STYLE','INPUT'].includes(node.tagName)) {
+      for (let i = 0; i < node.childNodes.length; i++) {
+        if (walk(node.childNodes[i])) i++;
+      }
+    }
+    return false;
+  };
+  walk(document.querySelector('.main'));
+
+  const first = document.querySelector('.highlight-match');
+  if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+/* === Particle Simulation === */
+const canvas = document.getElementById('particleCanvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let animId;
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+  canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+}
+
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function getSliderValues() {
+  return {
+    spawnRate: +document.getElementById('sliderSpawnRate').value,
+    lifetime: +document.getElementById('sliderLifetime').value / 100,
+    velocity: +document.getElementById('sliderVelocity').value,
+    gravity: +document.getElementById('sliderGravity').value,
+    drag: +document.getElementById('sliderDrag').value / 100,
+    size: +document.getElementById('sliderSize').value,
+    spread: +document.getElementById('sliderSpread').value * Math.PI / 180
+  };
+}
+
+function updateSliderDisplay() {
+  const v = getSliderValues();
+  document.getElementById('valSpawnRate').textContent = v.spawnRate;
+  document.getElementById('valLifetime').textContent = v.lifetime.toFixed(1) + 's';
+  document.getElementById('valVelocity').textContent = Math.round(v.velocity);
+  document.getElementById('valGravity').textContent = Math.round(v.gravity);
+  document.getElementById('valDrag').textContent = v.drag.toFixed(2);
+  document.getElementById('valSize').textContent = v.size;
+  document.getElementById('valSpread').textContent = Math.round(v.spread * 180 / Math.PI) + '°';
+}
+
+document.querySelectorAll('.demo-box input[type="range"]').forEach(s => {
+  s.addEventListener('input', updateSliderDisplay);
+});
+
+let lastSpawn = 0;
+let lastTime = 0;
+let particleColorMode = 'fire';
+
+function spawnParticle(x, y, v) {
+  const angle = -Math.PI / 2 + (Math.random() - 0.5) * v.spread;
+  const speed = v.velocity * (0.7 + Math.random() * 0.6);
+  particles.push({
+    x, y,
+    vx: Math.cos(angle) * speed,
+    vy: Math.sin(angle) * speed,
+    life: 0,
+    maxLife: v.lifetime * (0.7 + Math.random() * 0.6),
+    size: v.size * (0.6 + Math.random() * 0.8),
+    hue: particleColorMode === 'fire' ? 20 + Math.random() * 30 :
+         particleColorMode === 'ice' ? 190 + Math.random() * 30 :
+         particleColorMode === 'spark' ? 40 + Math.random() * 20 :
+         particleColorMode === 'smoke' ? 0 :
+         120 + Math.random() * 40
+  });
+}
+
+function animateParticles(time) {
+  const dt = Math.min((time - lastTime) / 1000, 0.05);
+  lastTime = time;
+  const v = getSliderValues();
+  const w = canvas.offsetWidth;
+  const h = canvas.offsetHeight;
+
+  ctx.clearRect(0, 0, w, h);
+
+  lastSpawn += dt;
+  const spawnInterval = 1 / v.spawnRate;
+  while (lastSpawn >= spawnInterval) {
+    spawnParticle(w / 2, h * 0.85, v);
+    lastSpawn -= spawnInterval;
+  }
+
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.life += dt;
+    if (p.life >= p.maxLife) { particles.splice(i, 1); continue; }
+
+    p.vy += v.gravity * dt;
+    p.vx *= (1 - v.drag * dt);
+    p.vy *= (1 - v.drag * dt);
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+
+    const norm = p.life / p.maxLife;
+    const alpha = norm < 0.1 ? norm / 0.1 : norm > 0.6 ? 1 - (norm - 0.6) / 0.4 : 1;
+    const sz = p.size * (norm < 0.2 ? 0.5 + norm * 2.5 : 1 - norm * 0.3);
+
+    if (particleColorMode === 'smoke') {
+      ctx.fillStyle = `rgba(180,180,190,${alpha * 0.4})`;
+    } else {
+      const sat = particleColorMode === 'fire' ? '100%' : '80%';
+      const light = particleColorMode === 'fire' ? (80 - norm * 50) + '%' : '60%';
+      ctx.fillStyle = `hsla(${p.hue - norm * 20},${sat},${light},${alpha * 0.9})`;
+    }
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, sz, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (alpha > 0.3 && particleColorMode !== 'smoke') {
+      ctx.fillStyle = `hsla(${p.hue},60%,80%,${alpha * 0.15})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, sz * 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  ctx.fillStyle = 'rgba(139,148,158,0.5)';
+  ctx.font = '12px monospace';
+  ctx.fillText('Particles: ' + particles.length, 10, 20);
+
+  animId = requestAnimationFrame(animateParticles);
+}
+
+requestAnimationFrame(animateParticles);
+
+function setPreset(name) {
+  const presets = {
+    fire:     { spawnRate: 80,  lifetime: 100, velocity: 200, gravity: 0,   drag: 20,  size: 8,  spread: 25, color: 'fire' },
+    snow:     { spawnRate: 40,  lifetime: 250, velocity: 40,  gravity: 50,  drag: 30,  size: 4,  spread: 160, color: 'ice' },
+    spark:    { spawnRate: 120, lifetime: 60,  velocity: 350, gravity: 300, drag: 5,   size: 3,  spread: 90, color: 'spark' },
+    smoke:    { spawnRate: 20,  lifetime: 280, velocity: 60,  gravity: 0,   drag: 40,  size: 16, spread: 40, color: 'smoke' },
+    fountain: { spawnRate: 100, lifetime: 150, velocity: 300, gravity: 400, drag: 5,   size: 4,  spread: 20, color: 'water' }
+  };
+  const p = presets[name];
+  if (!p) return;
+  particleColorMode = p.color;
+  document.getElementById('sliderSpawnRate').value = p.spawnRate;
+  document.getElementById('sliderLifetime').value = p.lifetime;
+  document.getElementById('sliderVelocity').value = p.velocity;
+  document.getElementById('sliderGravity').value = p.gravity;
+  document.getElementById('sliderDrag').value = p.drag;
+  document.getElementById('sliderSize').value = p.size;
+  document.getElementById('sliderSpread').value = p.spread;
+  updateSliderDisplay();
+  particles = [];
+}
+
+/* === Bezier Curve Editor with Tangent Handles === */
+const curveCanvas = document.getElementById('curveCanvas');
+const cctx = curveCanvas.getContext('2d');
+
+const CURVE_PAD = 40;
+let bzPoints = [];
+let bzDrag = { type: null, idx: -1 };
+
+function mkBzPt(x, y, hInX, hInY, hOutX, hOutY, mode) {
+  return { x, y, hInX: hInX ?? -0.08, hInY: hInY ?? 0, hOutX: hOutX ?? 0.08, hOutY: hOutY ?? 0, mode: mode ?? 'aligned' };
+}
+
+function alignHandle(p, movedSide) {
+  if (p.mode !== 'aligned') return;
+  if (movedSide === 'hIn') {
+    const len = Math.sqrt(p.hOutX * p.hOutX + p.hOutY * p.hOutY);
+    const inLen = Math.sqrt(p.hInX * p.hInX + p.hInY * p.hInY) || 0.001;
+    p.hOutX = -p.hInX / inLen * len;
+    p.hOutY = -p.hInY / inLen * len;
+  } else {
+    const len = Math.sqrt(p.hInX * p.hInX + p.hInY * p.hInY);
+    const outLen = Math.sqrt(p.hOutX * p.hOutX + p.hOutY * p.hOutY) || 0.001;
+    p.hInX = -p.hOutX / outLen * len;
+    p.hInY = -p.hOutY / outLen * len;
+  }
+}
+
+function initBezierDefaults() {
+  bzPoints = [
+    mkBzPt(0, 1, -0.05, 0, 0.1, 0, 'aligned'),
+    mkBzPt(0.3, 1, -0.1, 0, 0.1, 0, 'aligned'),
+    mkBzPt(0.7, 0.6, -0.1, 0.15, 0.1, -0.15, 'aligned'),
+    mkBzPt(1, 0, -0.12, 0.15, 0.05, 0, 'aligned')
+  ];
+}
+initBezierDefaults();
+
+function resizeCurveCanvas() {
+  curveCanvas.width = curveCanvas.offsetWidth * window.devicePixelRatio;
+  curveCanvas.height = curveCanvas.offsetHeight * window.devicePixelRatio;
+  cctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+  drawBezierCurve();
+}
+resizeCurveCanvas();
+window.addEventListener('resize', resizeCurveCanvas);
+
+function toScreenX(v) { return CURVE_PAD + v * (curveCanvas.offsetWidth - CURVE_PAD * 2); }
+function toScreenY(v) { return CURVE_PAD + (1 - v) * (curveCanvas.offsetHeight - CURVE_PAD * 2); }
+function fromScreenX(s) { return (s - CURVE_PAD) / (curveCanvas.offsetWidth - CURVE_PAD * 2); }
+function fromScreenY(s) { return 1 - (s - CURVE_PAD) / (curveCanvas.offsetHeight - CURVE_PAD * 2); }
+
+function cubicBezier(t, p0, p1, p2, p3) {
+  const u = 1 - t;
+  return u*u*u*p0 + 3*u*u*t*p1 + 3*u*t*t*p2 + t*t*t*p3;
+}
+
+function solveBezierX(targetX, x0, x1, x2, x3) {
+  let lo = 0, hi = 1;
+  for (let i = 0; i < 20; i++) {
+    const mid = (lo + hi) / 2;
+    if (cubicBezier(mid, x0, x1, x2, x3) < targetX) lo = mid; else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+function sampleBezierCurve(inputX) {
+  if (bzPoints.length < 2) return 0;
+  inputX = Math.max(0, Math.min(1, inputX));
+  if (inputX <= bzPoints[0].x) return bzPoints[0].y;
+  if (inputX >= bzPoints[bzPoints.length - 1].x) return bzPoints[bzPoints.length - 1].y;
+
+  for (let i = 0; i < bzPoints.length - 1; i++) {
+    const a = bzPoints[i], b = bzPoints[i + 1];
+    if (inputX >= a.x && inputX <= b.x) {
+      const cp1x = a.x + a.hOutX, cp1y = a.y + a.hOutY;
+      const cp2x = b.x + b.hInX, cp2y = b.y + b.hInY;
+      const t = solveBezierX(inputX, a.x, cp1x, cp2x, b.x);
+      return cubicBezier(t, a.y, cp1y, cp2y, b.y);
+    }
+  }
+  return 0;
+}
+
+function drawBezierCurve() {
+  const w = curveCanvas.offsetWidth, h = curveCanvas.offsetHeight;
+  const gw = w - CURVE_PAD * 2, gh = h - CURVE_PAD * 2;
+  cctx.clearRect(0, 0, w, h);
+
+  cctx.strokeStyle = 'rgba(48,54,61,0.6)';
+  cctx.lineWidth = 1;
+  for (let i = 0; i <= 10; i++) {
+    const x = CURVE_PAD + gw * i / 10;
+    const y = CURVE_PAD + gh * i / 10;
+    cctx.beginPath(); cctx.moveTo(x, CURVE_PAD); cctx.lineTo(x, CURVE_PAD + gh); cctx.stroke();
+    cctx.beginPath(); cctx.moveTo(CURVE_PAD, y); cctx.lineTo(CURVE_PAD + gw, y); cctx.stroke();
+  }
+
+  cctx.strokeStyle = 'rgba(88,166,255,0.15)';
+  cctx.lineWidth = 1;
+  [0, 0.25, 0.5, 0.75, 1].forEach(v => {
+    const y = toScreenY(v);
+    cctx.beginPath(); cctx.moveTo(CURVE_PAD, y); cctx.lineTo(CURVE_PAD + gw, y); cctx.stroke();
+  });
+
+  cctx.fillStyle = '#636c76';
+  cctx.font = '11px monospace';
+  cctx.textAlign = 'center';
+  [0, 0.25, 0.5, 0.75, 1].forEach(v => {
+    cctx.fillText(v.toFixed(v % 0.5 === 0 ? 0 : 2), toScreenX(v), h - CURVE_PAD + 18);
+  });
+  cctx.textAlign = 'right';
+  [0, 0.25, 0.5, 0.75, 1].forEach(v => {
+    cctx.fillText(v.toFixed(v % 0.5 === 0 ? 0 : 2), CURVE_PAD - 6, toScreenY(v) + 4);
+  });
+  cctx.textAlign = 'center';
+  cctx.fillText('NormalizedAge \u2192', CURVE_PAD + gw / 2, h - 6);
+  cctx.save(); cctx.translate(12, CURVE_PAD + gh / 2);
+  cctx.rotate(-Math.PI / 2); cctx.fillText('Alpha', 0, 0); cctx.restore();
+
+  bzPoints.sort((a, b) => a.x - b.x);
+
+  const gradient = cctx.createLinearGradient(CURVE_PAD, 0, CURVE_PAD + gw, 0);
+  gradient.addColorStop(0, 'rgba(88,166,255,0.12)');
+  gradient.addColorStop(1, 'rgba(88,166,255,0.02)');
+  cctx.fillStyle = gradient;
+  cctx.beginPath();
+  cctx.moveTo(toScreenX(0), toScreenY(0));
+  for (let px = 0; px <= gw; px++) {
+    const t = px / gw;
+    cctx.lineTo(CURVE_PAD + px, toScreenY(Math.max(0, Math.min(1, sampleBezierCurve(t)))));
+  }
+  cctx.lineTo(toScreenX(1), toScreenY(0));
+  cctx.closePath();
+  cctx.fill();
+
+  cctx.strokeStyle = '#58a6ff';
+  cctx.lineWidth = 2.5;
+  cctx.beginPath();
+  for (let px = 0; px <= gw; px++) {
+    const t = px / gw;
+    const val = sampleBezierCurve(t);
+    const sx = CURVE_PAD + px, sy = toScreenY(val);
+    px === 0 ? cctx.moveTo(sx, sy) : cctx.lineTo(sx, sy);
+  }
+  cctx.stroke();
+
+  bzPoints.forEach((p, i) => {
+    const sx = toScreenX(p.x), sy = toScreenY(p.y);
+    const hInSx = toScreenX(p.x + p.hInX), hInSy = toScreenY(p.y + p.hInY);
+    const hOutSx = toScreenX(p.x + p.hOutX), hOutSy = toScreenY(p.y + p.hOutY);
+    const isAligned = p.mode === 'aligned';
+
+    if (isAligned && i > 0 && i < bzPoints.length - 1) {
+      cctx.strokeStyle = 'rgba(210,153,34,0.5)';
+      cctx.lineWidth = 1.5;
+      cctx.beginPath(); cctx.moveTo(hInSx, hInSy); cctx.lineTo(hOutSx, hOutSy); cctx.stroke();
+    } else {
+      cctx.strokeStyle = isAligned ? 'rgba(210,153,34,0.5)' : 'rgba(248,81,73,0.45)';
+      cctx.lineWidth = 1.5;
+      if (i > 0) { cctx.beginPath(); cctx.moveTo(sx, sy); cctx.lineTo(hInSx, hInSy); cctx.stroke(); }
+      if (i < bzPoints.length - 1) { cctx.beginPath(); cctx.moveTo(sx, sy); cctx.lineTo(hOutSx, hOutSy); cctx.stroke(); }
+    }
+
+    const hColor = isAligned ? '#d29922' : '#f85149';
+    const drawDiamond = (cx, cy, r) => {
+      cctx.fillStyle = hColor;
+      cctx.beginPath();
+      cctx.moveTo(cx, cy - r); cctx.lineTo(cx + r, cy);
+      cctx.lineTo(cx, cy + r); cctx.lineTo(cx - r, cy);
+      cctx.closePath(); cctx.fill();
+    };
+    if (i > 0) drawDiamond(hInSx, hInSy, 5.5);
+    if (i < bzPoints.length - 1) drawDiamond(hOutSx, hOutSy, 5.5);
+
+    const isActive = bzDrag.type === 'point' && bzDrag.idx === i;
+    cctx.fillStyle = isActive ? '#79b8ff' : '#58a6ff';
+    cctx.beginPath(); cctx.arc(sx, sy, 7, 0, Math.PI * 2); cctx.fill();
+
+    if (isAligned) {
+      cctx.fillStyle = '#0d1117';
+      cctx.beginPath(); cctx.arc(sx, sy, 3, 0, Math.PI * 2); cctx.fill();
+    } else {
+      cctx.strokeStyle = '#f85149';
+      cctx.lineWidth = 1.5;
+      const cr = 3;
+      cctx.beginPath();
+      cctx.moveTo(sx - cr, sy - cr); cctx.lineTo(sx + cr, sy + cr);
+      cctx.moveTo(sx + cr, sy - cr); cctx.lineTo(sx - cr, sy + cr);
+      cctx.stroke();
+    }
+
+    const isAnyActive = bzDrag.type && bzDrag.idx === i;
+    if (isActive || isAnyActive) {
+      cctx.fillStyle = 'rgba(88,166,255,0.7)';
+      cctx.font = '10px monospace';
+      cctx.textAlign = 'center';
+      const modeLabel = isAligned ? 'Aligned' : 'Broken';
+      cctx.fillText('(' + p.x.toFixed(2) + ', ' + p.y.toFixed(2) + ')  [' + modeLabel + ']', sx, sy - 14);
+    }
+  });
+}
+
+let lastClickTime = 0;
+let lastClickIdx = -1;
+
+curveCanvas.addEventListener('mousedown', e => {
+  const rect = curveCanvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  const now = Date.now();
+
+  if (e.button === 2) {
+    for (let i = bzPoints.length - 1; i >= 0; i--) {
+      if (i === 0 || i === bzPoints.length - 1) continue;
+      if (Math.hypot(mx - toScreenX(bzPoints[i].x), my - toScreenY(bzPoints[i].y)) < 14) {
+        bzPoints.splice(i, 1);
+        drawBezierCurve();
+        return;
+      }
+    }
+    return;
+  }
+
+  for (let i = 0; i < bzPoints.length; i++) {
+    if (Math.hypot(mx - toScreenX(bzPoints[i].x), my - toScreenY(bzPoints[i].y)) < 14) {
+      if (now - lastClickTime < 350 && lastClickIdx === i) {
+        bzPoints[i].mode = bzPoints[i].mode === 'aligned' ? 'broken' : 'aligned';
+        if (bzPoints[i].mode === 'aligned') alignHandle(bzPoints[i], 'hOut');
+        lastClickTime = 0;
+        drawBezierCurve();
+        return;
+      }
+      lastClickTime = now;
+      lastClickIdx = i;
+    }
+  }
+
+  for (let i = 0; i < bzPoints.length; i++) {
+    const p = bzPoints[i];
+    const hInSx = toScreenX(p.x + p.hInX), hInSy = toScreenY(p.y + p.hInY);
+    const hOutSx = toScreenX(p.x + p.hOutX), hOutSy = toScreenY(p.y + p.hOutY);
+
+    if (i > 0 && Math.hypot(mx - hInSx, my - hInSy) < 10) {
+      bzDrag = { type: 'hIn', idx: i }; return;
+    }
+    if (i < bzPoints.length - 1 && Math.hypot(mx - hOutSx, my - hOutSy) < 10) {
+      bzDrag = { type: 'hOut', idx: i }; return;
+    }
+  }
+
+  for (let i = 0; i < bzPoints.length; i++) {
+    if (Math.hypot(mx - toScreenX(bzPoints[i].x), my - toScreenY(bzPoints[i].y)) < 14) {
+      bzDrag = { type: 'point', idx: i }; return;
+    }
+  }
+
+  const nx = Math.max(0.01, Math.min(0.99, fromScreenX(mx)));
+  const ny = Math.max(0, Math.min(1, fromScreenY(my)));
+  bzPoints.push(mkBzPt(nx, ny, -0.06, 0, 0.06, 0, 'aligned'));
+  bzPoints.sort((a, b) => a.x - b.x);
+  const newIdx = bzPoints.findIndex(p => Math.abs(p.x - nx) < 0.001 && Math.abs(p.y - ny) < 0.001);
+  bzDrag = { type: 'point', idx: newIdx };
+  drawBezierCurve();
+});
+
+curveCanvas.addEventListener('mousemove', e => {
+  if (!bzDrag.type) return;
+  const rect = curveCanvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  const p = bzPoints[bzDrag.idx];
+
+  if (bzDrag.type === 'point') {
+    let nx = fromScreenX(mx), ny = fromScreenY(my);
+    if (bzDrag.idx === 0) nx = 0;
+    if (bzDrag.idx === bzPoints.length - 1) nx = 1;
+    p.x = Math.max(0, Math.min(1, nx));
+    p.y = Math.max(-0.1, Math.min(1.1, ny));
+  } else if (bzDrag.type === 'hIn') {
+    p.hInX = fromScreenX(mx) - p.x;
+    p.hInY = fromScreenY(my) - p.y;
+    if (p.hInX > 0) p.hInX = 0;
+    alignHandle(p, 'hIn');
+  } else if (bzDrag.type === 'hOut') {
+    p.hOutX = fromScreenX(mx) - p.x;
+    p.hOutY = fromScreenY(my) - p.y;
+    if (p.hOutX < 0) p.hOutX = 0;
+    alignHandle(p, 'hOut');
+  }
+  drawBezierCurve();
+});
+
+curveCanvas.addEventListener('mouseup', () => { bzDrag = { type: null, idx: -1 }; });
+curveCanvas.addEventListener('mouseleave', () => { bzDrag = { type: null, idx: -1 }; });
+curveCanvas.addEventListener('contextmenu', e => e.preventDefault());
+
+function resetBezierCurve(type) {
+  const P = {
+    fadeout: [
+      mkBzPt(0, 1, -0.05, 0, 0.3, 0),
+      mkBzPt(1, 0, -0.3, 0, 0.05, 0)
+    ],
+    pulse: [
+      mkBzPt(0, 0, -0.02, 0, 0.02, 0.5),
+      mkBzPt(0.1, 1, -0.03, 0.3, 0.03, -0.4),
+      mkBzPt(0.22, 0.05, -0.03, 0.2, 0.03, 0.3),
+      mkBzPt(0.35, 0.85, -0.04, 0.2, 0.06, -0.3),
+      mkBzPt(0.55, 0.03, -0.05, 0.1, 0.1, 0),
+      mkBzPt(1, 0, -0.1, 0, 0.05, 0)
+    ],
+    fadeinout: [
+      mkBzPt(0, 0, -0.05, 0, 0.08, 0.6),
+      mkBzPt(0.2, 1, -0.06, 0.3, 0.15, 0),
+      mkBzPt(0.8, 1, -0.15, 0, 0.06, -0.3),
+      mkBzPt(1, 0, -0.08, 0.6, 0.05, 0)
+    ],
+    burst: [
+      mkBzPt(0, 1, -0.02, 0, 0.02, 0),
+      mkBzPt(0.06, 1, -0.02, 0, 0.04, -0.35),
+      mkBzPt(0.2, 0.3, -0.05, 0.2, 0.08, -0.1),
+      mkBzPt(0.5, 0.06, -0.1, 0.05, 0.15, 0),
+      mkBzPt(1, 0, -0.15, 0.02, 0.05, 0)
+    ],
+    easeInOut: [
+      mkBzPt(0, 0, -0.05, 0, 0.25, 0),
+      mkBzPt(0.5, 1, -0.2, 0, 0.2, 0),
+      mkBzPt(1, 0, -0.25, 0, 0.05, 0)
+    ],
+    sharp: [
+      mkBzPt(0, 0, -0.03, 0, 0.05, 0),
+      mkBzPt(0.15, 0, -0.04, 0, 0.01, 0.8),
+      mkBzPt(0.2, 1, -0.01, 0.5, 0.01, -0.5),
+      mkBzPt(0.25, 0, -0.01, 0.8, 0.04, 0),
+      mkBzPt(1, 0, -0.1, 0, 0.05, 0)
+    ]
+  };
+  bzPoints = (P[type] || P.fadeout).map(p => mkBzPt(p.x, p.y, p.hInX, p.hInY, p.hOutX, p.hOutY));
+  drawBezierCurve();
+}
+
+drawBezierCurve();
+
+/* === Section Notes System === */
+const NOTE_SECTIONS = [
+  { id: 'arch', title: '系统架构总览', icon: '🏗️' },
+  { id: 'lifecycle', title: '粒子生命周期', icon: '🔄' },
+  { id: 'stack', title: '模块堆栈详解', icon: '📚' },
+  { id: 'spawn', title: 'Spawn 生成参数', icon: '🌱' },
+  { id: 'update', title: 'Update 更新参数', icon: '⚙️' },
+  { id: 'render', title: 'Renderer 渲染器', icon: '🖼️' },
+  { id: 'forces', title: '力与物理', icon: '🌊' },
+  { id: 'dynamic', title: '动态输入', icon: '🧩' },
+  { id: 'dataif', title: '数据接口', icon: '🔌' },
+  { id: 'recipes', title: '元素配方', icon: '🔥' },
+  { id: 'interactive', title: '交互演示', icon: '🎮' },
+  { id: 'cheat', title: '速查问答', icon: '⚡' },
+  { id: 'path', title: '学习路径', icon: '🗺️' }
+];
+
+const STORAGE_KEY = 'niagara_section_notes';
+
+function loadAllNotes() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; }
+}
+
+function saveAllNotes(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  showNoteStatus('已自动保存');
+}
+
+function showNoteStatus(msg) {
+  const el = document.getElementById('noteStatus');
+  if (!el) return;
+  el.textContent = '✓ ' + msg;
+  el.style.color = 'var(--accent-green)';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.textContent = ''; }, 2500);
+}
+
+function buildSectionNotes() {
+  const container = document.getElementById('sectionNotesContainer');
+  if (!container) return;
+  const notes = loadAllNotes();
+
+  container.innerHTML = NOTE_SECTIONS.map(sec => {
+    const val = notes[sec.id] || '';
+    const hasContent = val.trim().length > 0;
+    return '<div class="collapsible' + (hasContent ? ' open' : '') + '" onclick="toggleCollapsible(this)">' +
+      '<div class="collapsible-header">' +
+        '<div class="collapsible-title">' +
+          '<span>' + sec.icon + '</span> ' + sec.title +
+          (hasContent ? ' <span style=\"font-size:11px;color:var(--accent-green);font-weight:400;\">(' + val.trim().split('\\n').length + ' 行)</span>' : '') +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<a href="#' + sec.id + '" onclick="event.stopPropagation();" style="font-size:11px;color:var(--accent-blue);text-decoration:none;">跳转章节 →</a>' +
+          '<div class="collapsible-arrow">▶</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="collapsible-body"><div class="collapsible-content" style="padding-top:8px;">' +
+        '<textarea class="section-note-input" data-section="' + sec.id + '" ' +
+          'placeholder="在这里记录「' + sec.title + '」相关的学习笔记...\n\n支持 Markdown 语法" ' +
+          'style="width:100%;min-height:80px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text-primary);font-size:13px;font-family:inherit;line-height:1.7;resize:vertical;outline:none;"' +
+        '>' + escHtml(val) + '</textarea>' +
+      '</div></div>' +
+    '</div>';
+  }).join('');
+
+  container.querySelectorAll('.section-note-input').forEach(ta => {
+    ta.addEventListener('input', () => {
+      const data = loadAllNotes();
+      data[ta.dataset.section] = ta.value;
+      saveAllNotes(data);
+    });
+    ta.addEventListener('focus', e => { e.target.style.borderColor = 'var(--accent-blue)'; });
+    ta.addEventListener('blur', e => { e.target.style.borderColor = 'var(--border)'; });
+  });
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function generateMarkdown() {
+  const notes = loadAllNotes();
+  const freeNote = document.getElementById('userNotesFree');
+  const freeVal = freeNote ? freeNote.value : '';
+  const now = new Date();
+  const dateStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+
+  let md = '# Niagara VFX 学习笔记\n\n';
+  md += '> 导出时间：' + now.toLocaleString('zh-CN') + '  \n';
+  md += '> 来源：Niagara VFX 参数速查与学习指南  \n';
+  md += '> 配套课程：[元素神殿 - realtime.xyz](https://www.realtime.xyz/moon)\n\n';
+  md += '---\n\n';
+
+  let hasAnyNote = false;
+  NOTE_SECTIONS.forEach(sec => {
+    const val = (notes[sec.id] || '').trim();
+    if (val) {
+      hasAnyNote = true;
+      md += '## ' + sec.icon + ' ' + sec.title + '\n\n';
+      md += val + '\n\n';
+    }
+  });
+
+  if (!hasAnyNote) {
+    md += '*暂无章节笔记*\n\n';
+  }
+
+  if (freeVal.trim()) {
+    md += '---\n\n## 📝 自由笔记\n\n' + freeVal.trim() + '\n';
+  }
+
+  return { md, dateStr };
+}
+
+document.getElementById('btnExportMd').addEventListener('click', () => {
+  const { md, dateStr } = generateMarkdown();
+  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Niagara\u5b66\u4e60\u7b14\u8bb0_' + dateStr + '.md';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showNoteStatus('已导出 .md 文件');
+});
+
+document.getElementById('btnExportJson').addEventListener('click', () => {
+  const notes = loadAllNotes();
+  const freeNote = document.getElementById('userNotesFree');
+  const data = { sections: notes, free: freeNote ? freeNote.value : '', exportTime: new Date().toISOString(), version: 1 };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Niagara\u7b14\u8bb0\u5907\u4efd_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showNoteStatus('已导出备份 .json');
+});
+
+document.getElementById('btnImportJson').addEventListener('click', () => {
+  document.getElementById('importFile').click();
+});
+
+document.getElementById('importFile').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (data.sections) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data.sections));
+      }
+      if (data.free) {
+        const freeNote = document.getElementById('userNotesFree');
+        if (freeNote) { freeNote.value = data.free; localStorage.setItem('niagara_notes_free', data.free); }
+      }
+      buildSectionNotes();
+      showNoteStatus('已导入备份（' + Object.keys(data.sections || {}).length + ' 个章节）');
+    } catch(err) {
+      alert('导入失败：文件格式不正确');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+buildSectionNotes();
+
+const freeNoteArea = document.getElementById('userNotesFree');
+if (freeNoteArea) {
+  const saved = localStorage.getItem('niagara_notes_free');
+  if (saved) freeNoteArea.value = saved;
+  freeNoteArea.addEventListener('input', () => {
+    localStorage.setItem('niagara_notes_free', freeNoteArea.value);
+    showNoteStatus('已自动保存');
+  });
+}
+
+updateSliderDisplay();
+</script>
+
+</body>
+</html>
